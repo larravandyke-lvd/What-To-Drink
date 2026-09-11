@@ -1,8 +1,8 @@
 :root {
-  --bg: #10151f;
-  --panel: #1a2333;
-  --line: #2e3d54;
-  --cream: #eee6d8;
+  --bg: #1c1c1c;
+  --panel: #262626;
+  --line: #3d3d3d;
+  --cream: #ece6dc;
   --amber: #c1703a;
   --amber-dim: #a45a2b;
   --rust: #6b8f71;
@@ -12,7 +12,18 @@
 
 body {
   margin: 0;
-  background: var(--bg);
+  background-color: var(--bg);
+  background-image:
+    radial-gradient(circle 3px at 15% 25%, rgba(236,230,220,0.06), transparent),
+    radial-gradient(circle 2px at 35% 65%, rgba(236,230,220,0.05), transparent),
+    radial-gradient(circle 4px at 55% 15%, rgba(236,230,220,0.04), transparent),
+    radial-gradient(circle 2px at 75% 45%, rgba(236,230,220,0.06), transparent),
+    radial-gradient(circle 3px at 90% 75%, rgba(236,230,220,0.05), transparent),
+    radial-gradient(circle 2px at 25% 85%, rgba(236,230,220,0.04), transparent),
+    radial-gradient(circle 3px at 65% 90%, rgba(236,230,220,0.05), transparent),
+    radial-gradient(circle 2px at 5% 55%, rgba(236,230,220,0.04), transparent);
+  background-size: 420px 420px;
+  background-repeat: repeat;
   color: var(--cream);
   font-family: Georgia, "Times New Roman", serif;
 }
@@ -21,18 +32,19 @@ body {
 
 .header {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 16px;
-  padding-bottom: 20px;
+  gap: 10px;
+  padding: 20px 0 24px;
   border-bottom: 1px solid var(--line);
   margin-bottom: 20px;
-  flex-wrap: wrap;
+  text-align: center;
 }
 
-.brand { display: flex; align-items: center; gap: 14px; flex: 1; min-width: 240px; }
+.brand { display: flex; align-items: center; gap: 14px; }
 .brand-icon { width: 48px; height: 48px; border-radius: 12px; }
-.brand h1 { margin: 0; font-size: 26px; }
-.brand p { margin: 2px 0 0; color: #c9b9a8; font-size: 13px; }
+.brand h1 { margin: 0; font-size: 32px; letter-spacing: 0.02em; }
+.tagline { margin: 0; color: #c9b9a8; font-size: 14px; }
 
 .add-btn {
   background: var(--amber);
@@ -249,3 +261,38 @@ body {
   background: none; border: none; color: var(--amber);
   font-size: 12px; padding: 4px 0 8px; cursor: pointer; font-family: inherit;
 }
+
+.portal-link {
+  display: inline-block;
+  color: var(--amber);
+  font-size: 13px;
+  text-decoration: none;
+  padding: 16px 0 0;
+}
+.portal-link:hover { text-decoration: underline; }
+
+.eyebrow {
+  margin: 0;
+  font-size: 12px;
+  letter-spacing: 0.15em;
+  color: #a08d7a;
+  text-transform: uppercase;
+}
+
+.scroll-top-btn {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: var(--amber);
+  color: #1c1c1c;
+  border: none;
+  font-size: 20px;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(0,0,0,0.4);
+  z-index: 20;
+}
+.scroll-top-btn:hover { background: var(--amber-dim); }

@@ -51,6 +51,7 @@ export default function Home() {
   const [pendingPhoto, setPendingPhoto] = useState(null); // { base64, mediaType, previewUrl }
   const [form, setForm] = useState(emptyForm());
   const [expandedCards, setExpandedCards] = useState({});
+  const [showScrollTop, setShowScrollTop] = useState(false);
   const cameraInputRef = useRef(null);
   const libraryInputRef = useRef(null);
 
@@ -68,6 +69,14 @@ export default function Home() {
     loadItems();
     const interval = setInterval(loadItems, 20000);
     return () => clearInterval(interval);
+  }, []);
+
+  useEffect(() => {
+    function onScroll() {
+      setShowScrollTop(window.scrollY > 400);
+    }
+    window.addEventListener("scroll", onScroll);
+    return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
   const filtered = useMemo(() => {
@@ -299,14 +308,17 @@ export default function Home() {
 
   return (
     <div className="page">
+      <a href="https://portals-gateway.vercel.app/" className="portal-link">
+        ← Portal Menu
+      </a>
+
       <header className="header">
+        <p className="eyebrow">CVD</p>
         <div className="brand">
           <img src="/icon.svg" alt="" className="brand-icon" />
-          <div>
-            <h1>What To Drink</h1>
-            <p>Snap a bottle, glass, or menu — we'll fill in the rest.</p>
-          </div>
+          <h1>What To Drink</h1>
         </div>
+        <p className="tagline">Snap a bottle, glass, or menu — we'll fill in the rest.</p>
         <button className="add-btn" onClick={openAdd}>
           + Add something
         </button>
@@ -638,6 +650,16 @@ export default function Home() {
             </div>
           </div>
         </div>
+      )}
+
+      {showScrollTop && (
+        <button
+          className="scroll-top-btn"
+          onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+          aria-label="Back to top"
+        >
+          ↑
+        </button>
       )}
     </div>
   );
