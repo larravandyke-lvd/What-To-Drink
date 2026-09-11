@@ -10,7 +10,7 @@ export default async function handler(req, res) {
   if (!person || !value) return res.status(400).json({ error: "person and value required" });
 
   try {
-    const { rows } = await sql`
+    const rows = await sql`
       UPDATE drinks
       SET ratings = jsonb_set(COALESCE(ratings, '{}'::jsonb), ARRAY[${person}], to_jsonb(${value}::text))
       WHERE id = ${id}
