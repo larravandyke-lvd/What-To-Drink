@@ -406,7 +406,7 @@ export default function Home() {
                 <div className="photo-fallback">🍸</div>
               )}
               {it.rating && (
-                
+                <a
                   className="rating-badge"
                   href={it.ratingLink || undefined}
                   target="_blank"
