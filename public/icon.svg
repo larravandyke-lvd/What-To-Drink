@@ -1,0 +1,36 @@
+<svg viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#3A2434"/>
+      <stop offset="100%" stop-color="#241521"/>
+    </linearGradient>
+    <linearGradient id="liquid" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#E3A548"/>
+      <stop offset="100%" stop-color="#C1791F"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="512" height="512" rx="104" fill="url(#bg)"/>
+
+  <ellipse cx="256" cy="392" rx="54" ry="13" fill="none" stroke="#F3E7D6" stroke-width="9" stroke-linecap="round"/>
+  <line x1="256" y1="300" x2="256" y2="384" stroke="#F3E7D6" stroke-width="9" stroke-linecap="round"/>
+
+  <path d="M146,178 C146,240 196,278 256,302 C316,278 366,240 366,178 Z" fill="url(#liquid)"/>
+
+  <path d="M138,172 C138,240 194,282 256,308 C318,282 374,240 374,172" fill="none" stroke="#F3E7D6" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/>
+  <ellipse cx="256" cy="172" rx="118" ry="20" fill="none" stroke="#F3E7D6" stroke-width="9"/>
+
+  <g transform="translate(332,140) rotate(18)">
+    <circle r="38" fill="#D9622F" stroke="#F3E7D6" stroke-width="6"/>
+    <circle r="15" fill="none" stroke="#F3E7D6" stroke-width="4"/>
+    <line x1="0" y1="-38" x2="0" y2="38" stroke="#F3E7D6" stroke-width="4"/>
+    <line x1="-33" y1="-19" x2="33" y2="19" stroke="#F3E7D6" stroke-width="4"/>
+    <line x1="-33" y1="19" x2="33" y2="-19" stroke="#F3E7D6" stroke-width="4"/>
+  </g>
+
+  <g transform="translate(198,340) rotate(-22)">
+    <path d="M0,0 L34,0 L34,22 L17,34 L0,22 Z" fill="#F3E7D6" stroke="#241521" stroke-width="3"/>
+    <circle cx="17" cy="10" r="3.5" fill="#241521"/>
+  </g>
+  <path d="M226,320 C214,328 206,334 200,340" fill="none" stroke="#F3E7D6" stroke-width="4" stroke-linecap="round"/>
+</svg>
