@@ -1,16 +1,4 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { db, storage } from "../lib/firebase";
-import {
-  collection,
-  addDoc,
-  updateDoc,
-  doc,
-  onSnapshot,
-  serverTimestamp,
-  orderBy,
-  query,
-} from "firebase/firestore";
-import { ref, uploadString, getDownloadURL } from "firebase/storage";
 
 const CATEGORIES = ["Beer", "Wine", "Sake", "Spirits", "Cordials & Digestifs", "Cocktails"];
 const REACTIONS = [
@@ -44,12 +32,20 @@ export default function Home() {
   const [form, setForm] = useState(null);
   const fileInputRef = useRef(null);
 
+  async function loadItems() {
+    try {
+      const res = await fetch("/api/drinks");
+      const data = await res.json();
+      setItems(data);
+    } catch {
+      // keep showing whatever we already have
+    }
+  }
+
   useEffect(() => {
-    const q = query(collection(db, "drinks"), orderBy("createdAt", "desc"));
-    const unsub = onSnapshot(q, (snap) => {
-      setItems(snap.docs.map((d) => ({ id: d.id, ...d.data() })));
-    });
-    return unsub;
+    loadItems();
+    const interval = setInterval(loadItems, 20000);
+    return () => clearInterval(interval);
   }, []);
 
   const filtered = useMemo(() => {
@@ -164,31 +160,33 @@ export default function Home() {
     if (!form || !pendingPhoto) return;
     setSaving(true);
     try {
-      const path = `drinks/${Date.now()}.jpg`;
-      const storageRef = ref(storage, path);
-      await uploadString(storageRef, pendingPhoto.base64, "base64", {
-        contentType: pendingPhoto.mediaType,
+      const res = await fetch("/api/drinks", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: form.name,
+          category: form.category,
+          tags: form.tags.split(",").map((t) => t.trim()).filter(Boolean),
+          abv: form.abv,
+          region: form.region,
+          producer: form.producer,
+          notes: form.notes,
+          pairing: form.pairing,
+          rating: form.rating,
+          ratingScale: form.ratingScale,
+          ratingSource: form.ratingSource,
+          ratingLink: form.ratingLink,
+          similar: form.similar.split(",").map((s) => s.trim()).filter(Boolean),
+          addedBy: form.addedBy,
+          base64: pendingPhoto.base64,
+          mediaType: pendingPhoto.mediaType,
+        }),
       });
-      const photoURL = await getDownloadURL(storageRef);
-      await addDoc(collection(db, "drinks"), {
-        name: form.name,
-        category: form.category,
-        tags: form.tags.split(",").map((t) => t.trim()).filter(Boolean),
-        abv: form.abv,
-        region: form.region,
-        producer: form.producer,
-        notes: form.notes,
-        pairing: form.pairing,
-        rating: form.rating,
-        ratingScale: form.ratingScale,
-        ratingSource: form.ratingSource,
-        ratingLink: form.ratingLink,
-        similar: form.similar.split(",").map((s) => s.trim()).filter(Boolean),
-        ratings: {},
-        addedBy: form.addedBy,
-        photoURL,
-        createdAt: serverTimestamp(),
-      });
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.error || "save failed");
+      }
+      await loadItems();
       closeAdd();
     } catch (err) {
       alert("Save failed: " + err.message);
@@ -201,9 +199,19 @@ export default function Home() {
   function cycleRating(itemId, person, current) {
     const idx = RATING_CYCLE.indexOf(current || "TBD");
     const next = RATING_CYCLE[(idx + 1) % RATING_CYCLE.length];
-    updateDoc(doc(db, "drinks", itemId), { [`ratings.${person}`]: next }).catch((err) =>
-      alert("Couldn't save that reaction: " + err.message)
+
+    // optimistic local update
+    setItems((prev) =>
+      prev.map((it) =>
+        it.id === itemId ? { ...it, ratings: { ...it.ratings, [person]: next } } : it
+      )
     );
+
+    fetch(`/api/drinks/${itemId}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ person, value: next }),
+    }).catch((err) => alert("Couldn't save that reaction: " + err.message));
   }
 
   function closeAdd() {
