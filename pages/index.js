@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 
-const CATEGORIES = ["Beer", "Wine", "Sake", "Spirits", "Cordials & Digestifs", "Cocktails", "Jello Shots"];
+const CATEGORIES = ["Beer", "Wine", "Sake", "Spirits", "Cordials & Digestifs", "Cocktails"];
 const REACTIONS = [
   { value: "up", icon: "👍" },
   { value: "sideways", icon: "🤷" },
@@ -23,7 +23,8 @@ function emptyForm() {
     ratingSource: "",
     ratingLink: "",
     similar: "",
-    addedBy: PEOPLE[0],
+    addedBy: "",
+    photoUrl: "",
   };
 }
 
@@ -201,6 +202,7 @@ export default function Home() {
         ratingSource: enriched.ratingSource || "",
         ratingLink: enriched.ratingLink || "",
         similar: (enriched.similar || []).join(", "),
+        photoUrl: enriched.photoUrl || prev.photoUrl,
       }));
     } catch {
       // leave form as-is
@@ -210,7 +212,7 @@ export default function Home() {
   }
 
   async function handleSave() {
-    if (!form.name.trim()) return;
+    if (!form.name.trim() || !form.addedBy) return;
     setSaving(true);
     try {
       const res = await fetch("/api/drinks", {
@@ -233,6 +235,7 @@ export default function Home() {
           addedBy: form.addedBy,
           base64: pendingPhoto?.base64 || null,
           mediaType: pendingPhoto?.mediaType || null,
+          existingPhotoUrl: !pendingPhoto && form.photoUrl ? form.photoUrl : null,
         }),
       });
       if (!res.ok) {
@@ -505,7 +508,11 @@ export default function Home() {
               </button>
             </div>
 
-            {pendingPhoto?.previewUrl && <img className="preview" src={pendingPhoto.previewUrl} alt="" />}
+            {pendingPhoto?.previewUrl ? (
+              <img className="preview" src={pendingPhoto.previewUrl} alt="" />
+            ) : form.photoUrl ? (
+              <img className="preview" src={form.photoUrl} alt="" />
+            ) : null}
             {analyzing && <p className="analyzing">Looking it up…</p>}
 
             <div className="form">
@@ -555,6 +562,7 @@ export default function Home() {
                     </button>
                   ))}
                 </div>
+                {!form.addedBy && <span className="required-hint">Pick who's adding this</span>}
               </label>
 
               <label>
@@ -604,7 +612,7 @@ export default function Home() {
 
               <div className="modal-actions">
                 <button onClick={closeAdd} className="secondary">Cancel</button>
-                <button onClick={handleSave} disabled={saving || !form.name.trim()}>
+                <button onClick={handleSave} disabled={saving || !form.name.trim() || !form.addedBy}>
                   {saving ? "Saving…" : "Save"}
                 </button>
               </div>
