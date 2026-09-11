@@ -209,7 +209,6 @@ export default function Home() {
         rating: enriched.rating || "",
         ratingScale: enriched.ratingScale || "",
         ratingSource: enriched.ratingSource || "",
-        ratingSource: enriched.ratingSource || "",
         ratingLink: enriched.ratingLink || "",
         similar: (enriched.similar || []).join(", "),
         photoUrl: enriched.photoUrl || prev.photoUrl,
