@@ -393,6 +393,7 @@ export default function Home() {
                 <img src={it.photoURL} alt={it.name} />
                 {it.rating && (
                   
+                  <a
                     className="rating-badge"
                     href={it.ratingLink || undefined}
                     target="_blank"
