@@ -1,5 +1,5 @@
 import { put } from "@vercel/blob";
-import { sql, ensureTable } from "../../lib/db";
+import { sql, ensureTable } from "../../../lib/db";
 
 export const config = {
   api: { bodyParser: { sizeLimit: "10mb" } },
