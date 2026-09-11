@@ -38,49 +38,6 @@ export default async function handler(req, res) {
       const {
         name, category, tags, abv, region, producer, notes, pairing,
         rating, ratingScale, ratingSource, ratingLink, similar, addedBy,
-done
-sed -i '' 's/, "Jello Shots"//' "$HOME/Documents/GitHub/What-To-Drink/pages/api/enrich.js"
-cat > "$HOME/Documents/GitHub/What-To-Drink/pages/api/drinks/index.js" << 'DRINKSEOF'
-import { put } from "@vercel/blob";
-import { sql, ensureTable } from "../../lib/db";
-
-export const config = {
-  api: { bodyParser: { sizeLimit: "10mb" } },
-};
-
-export default async function handler(req, res) {
-  await ensureTable();
-
-  if (req.method === "GET") {
-    const rows = await sql`SELECT * FROM drinks ORDER BY created_at DESC`;
-    const mapped = rows.map((r) => ({
-      id: r.id,
-      name: r.name,
-      category: r.category,
-      tags: r.tags || [],
-      abv: r.abv,
-      region: r.region,
-      producer: r.producer,
-      notes: r.notes,
-      pairing: r.pairing,
-      rating: r.rating,
-      ratingScale: r.rating_scale,
-      ratingSource: r.rating_source,
-      ratingLink: r.rating_link,
-      similar: r.similar || [],
-      ratings: r.ratings || {},
-      addedBy: r.added_by,
-      photoURL: r.photo_url,
-      createdAt: r.created_at,
-    }));
-    return res.status(200).json(mapped);
-  }
-
-  if (req.method === "POST") {
-    try {
-      const {
-        name, category, tags, abv, region, producer, notes, pairing,
-        rating, ratingScale, ratingSource, ratingLink, similar, addedBy,
         base64, mediaType, existingPhotoUrl,
       } = req.body || {};
 
