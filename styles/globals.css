@@ -1,11 +1,11 @@
 :root {
-  --bg: #1c1119;
-  --panel: #241521;
-  --line: #3a2434;
-  --cream: #f3e7d6;
-  --amber: #d9922f;
-  --amber-dim: #c1791f;
-  --rust: #c1502e;
+  --bg: #10151f;
+  --panel: #1a2333;
+  --line: #2e3d54;
+  --cream: #eee6d8;
+  --amber: #c1703a;
+  --amber-dim: #a45a2b;
+  --rust: #6b8f71;
 }
 
 * { box-sizing: border-box; }
@@ -230,3 +230,22 @@ body {
 }
 .modal-actions button:not(.secondary) { background: var(--amber); color: #241521; }
 .modal-actions .secondary { background: transparent; color: var(--cream); border: 1px solid var(--line); }
+
+.photo-fallback {
+  width: 100%; height: 160px; display: flex; align-items: center; justify-content: center;
+  font-size: 48px; background: linear-gradient(160deg, var(--panel), var(--bg));
+}
+.clamp-block {
+  max-height: 60px;
+  overflow: hidden;
+  position: relative;
+}
+.clamp-block::after {
+  content: "";
+  position: absolute; bottom: 0; left: 0; right: 0; height: 24px;
+  background: linear-gradient(transparent, var(--panel));
+}
+.expand-toggle {
+  background: none; border: none; color: var(--amber);
+  font-size: 12px; padding: 4px 0 8px; cursor: pointer; font-family: inherit;
+}

@@ -50,6 +50,7 @@ export default function Home() {
   const [saving, setSaving] = useState(false);
   const [pendingPhoto, setPendingPhoto] = useState(null); // { base64, mediaType, previewUrl }
   const [form, setForm] = useState(emptyForm());
+  const [expandedCards, setExpandedCards] = useState({});
   const cameraInputRef = useRef(null);
   const libraryInputRef = useRef(null);
 
@@ -212,7 +213,14 @@ export default function Home() {
   }
 
   async function handleSave() {
-    if (!form.name.trim() || !form.addedBy) return;
+    if (!form.name.trim()) {
+      alert("Give it a name before saving.");
+      return;
+    }
+    if (!form.addedBy) {
+      alert("Pick who's adding this before saving.");
+      return;
+    }
     setSaving(true);
     try {
       const res = await fetch("/api/drinks", {
@@ -391,23 +399,24 @@ export default function Home() {
       <div className="grid">
         {filtered.map((it) => (
           <div className="card" key={it.id}>
-            {it.photoURL && (
-              <div className="card-photo">
+            <div className="card-photo">
+              {it.photoURL ? (
                 <img src={it.photoURL} alt={it.name} />
-                {it.rating && (
-                  
-                  <a
-                    className="rating-badge"
-                    href={it.ratingLink || undefined}
-                    target="_blank"
-                    rel="noreferrer"
-                    onClick={(e) => !it.ratingLink && e.preventDefault()}
-                  >
-                    {it.rating}{it.ratingScale?.includes("100") ? "" : "★"}
-                  </a>
-                )}
-              </div>
-            )}
+              ) : (
+                <div className="photo-fallback">🍸</div>
+              )}
+              {it.rating && (
+                
+                  className="rating-badge"
+                  href={it.ratingLink || undefined}
+                  target="_blank"
+                  rel="noreferrer"
+                  onClick={(e) => !it.ratingLink && e.preventDefault()}
+                >
+                  {it.rating}{it.ratingScale?.includes("100") ? "" : "★"}
+                </a>
+              )}
+            </div>
             <div className="card-body">
               <h3>{it.name}</h3>
               <div className="card-meta">
@@ -425,10 +434,20 @@ export default function Home() {
                 <p className="added-by">{it.rating} on {it.ratingSource}</p>
               )}
               {it.producer && <p className="notes"><em>{it.producer}</em>{it.region ? ` · ${it.region}` : ""}</p>}
-              {it.notes && <p className="notes">{it.notes}</p>}
-              {it.pairing && <p className="notes">Pairs with: {it.pairing}</p>}
-              {it.similar?.length > 0 && (
-                <p className="notes">If you like this, try: {it.similar.join(", ")}</p>
+              <div className={expandedCards[it.id] ? "" : "clamp-block"}>
+                {it.notes && <p className="notes">{it.notes}</p>}
+                {it.pairing && <p className="notes">Pairs with: {it.pairing}</p>}
+                {it.similar?.length > 0 && (
+                  <p className="notes">If you like this, try: {it.similar.join(", ")}</p>
+                )}
+              </div>
+              {(it.notes || it.pairing || it.similar?.length > 0) && (
+                <button
+                  className="expand-toggle"
+                  onClick={() => setExpandedCards((prev) => ({ ...prev, [it.id]: !prev[it.id] }))}
+                >
+                  {expandedCards[it.id] ? "Show less" : "Show more"}
+                </button>
               )}
               <div className="people-ratings">
                 {PEOPLE.map((p) => {
@@ -612,7 +631,7 @@ export default function Home() {
 
               <div className="modal-actions">
                 <button onClick={closeAdd} className="secondary">Cancel</button>
-                <button onClick={handleSave} disabled={saving || !form.name.trim() || !form.addedBy}>
+                <button onClick={handleSave} disabled={saving}>
                   {saving ? "Saving…" : "Save"}
                 </button>
               </div>
