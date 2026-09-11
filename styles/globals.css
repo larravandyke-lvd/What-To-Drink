@@ -145,6 +145,28 @@ body {
 
 .empty { color: #8a7a6a; grid-column: 1 / -1; text-align: center; padding: 40px 0; }
 
+.mode-choice { display: flex; flex-direction: column; gap: 12px; }
+.mode-title { margin: 0 0 4px; font-size: 15px; color: var(--cream); }
+.mode-btn {
+  background: var(--bg);
+  border: 1px solid var(--line);
+  color: var(--cream);
+  padding: 16px;
+  border-radius: 10px;
+  font-size: 15px;
+  font-family: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.mode-btn:hover { border-color: var(--amber); }
+
+.type-entry { display: flex; flex-direction: column; gap: 12px; }
+.type-entry label { display: flex; flex-direction: column; gap: 4px; font-size: 13px; color: #c9b9a8; }
+.type-entry input {
+  background: var(--bg); border: 1px solid var(--line); color: var(--cream);
+  padding: 10px 12px; border-radius: 8px; font-family: inherit; font-size: 14px;
+}
+
 .modal-overlay {
   position: fixed; inset: 0; background: rgba(0,0,0,0.6);
   display: flex; align-items: center; justify-content: center; padding: 20px; z-index: 10;

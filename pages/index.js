@@ -26,6 +26,8 @@ export default function Home() {
   const [activeTag, setActiveTag] = useState(null);
   const [search, setSearch] = useState("");
   const [showAdd, setShowAdd] = useState(false);
+  const [addMode, setAddMode] = useState(null); // null | "photo" | "type"
+  const [typedName, setTypedName] = useState("");
   const [analyzing, setAnalyzing] = useState(false);
   const [saving, setSaving] = useState(false);
   const [pendingPhoto, setPendingPhoto] = useState(null); // { base64, mediaType, previewUrl }
@@ -89,6 +91,7 @@ export default function Home() {
   async function handleFile(e) {
     const file = e.target.files?.[0];
     if (!file) return;
+    setAddMode("photo");
     setAnalyzing(true);
     setShowAdd(true);
     try {
@@ -156,8 +159,56 @@ export default function Home() {
     }
   }
 
+  async function handleTypedSubmit() {
+    if (!typedName.trim()) return;
+    setAnalyzing(true);
+    try {
+      const enrichRes = await fetch("/api/enrich", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: typedName.trim() }),
+      });
+      const enriched = await enrichRes.json();
+      setForm({
+        name: typedName.trim(),
+        category: CATEGORIES.includes(enriched.category) ? enriched.category : CATEGORIES[0],
+        tags: (enriched.tags || []).join(", "),
+        abv: enriched.abv || "",
+        region: enriched.region || "",
+        producer: enriched.producer || "",
+        notes: enriched.notes || "",
+        pairing: enriched.pairing || "",
+        rating: enriched.rating || "",
+        ratingScale: enriched.ratingScale || "",
+        ratingSource: enriched.ratingSource || "",
+        ratingLink: enriched.ratingLink || "",
+        similar: (enriched.similar || []).join(", "),
+        addedBy: PEOPLE[0],
+      });
+    } catch {
+      setForm({
+        name: typedName.trim(),
+        category: CATEGORIES[0],
+        tags: "",
+        abv: "",
+        region: "",
+        producer: "",
+        notes: "",
+        pairing: "",
+        rating: "",
+        ratingScale: "",
+        ratingSource: "",
+        ratingLink: "",
+        similar: "",
+        addedBy: PEOPLE[0],
+      });
+    } finally {
+      setAnalyzing(false);
+    }
+  }
+
   async function handleSave() {
-    if (!form || !pendingPhoto) return;
+    if (!form) return;
     setSaving(true);
     try {
       const res = await fetch("/api/drinks", {
@@ -178,8 +229,8 @@ export default function Home() {
           ratingLink: form.ratingLink,
           similar: form.similar.split(",").map((s) => s.trim()).filter(Boolean),
           addedBy: form.addedBy,
-          base64: pendingPhoto.base64,
-          mediaType: pendingPhoto.mediaType,
+          base64: pendingPhoto?.base64 || null,
+          mediaType: pendingPhoto?.mediaType || null,
         }),
       });
       if (!res.ok) {
@@ -216,6 +267,8 @@ export default function Home() {
 
   function closeAdd() {
     setShowAdd(false);
+    setAddMode(null);
+    setTypedName("");
     setForm(null);
     setPendingPhoto(null);
     if (fileInputRef.current) fileInputRef.current.value = "";
@@ -237,14 +290,13 @@ export default function Home() {
             <p>Snap a bottle, glass, or menu — we'll fill in the rest.</p>
           </div>
         </div>
-        <button className="add-btn" onClick={() => fileInputRef.current?.click()}>
+        <button className="add-btn" onClick={() => setShowAdd(true)}>
           + Add something
         </button>
         <input
           ref={fileInputRef}
           type="file"
           accept="image/*"
-          capture="environment"
           hidden
           onChange={handleFile}
         />
@@ -401,9 +453,42 @@ export default function Home() {
       {showAdd && (
         <div className="modal-overlay" onClick={closeAdd}>
           <div className="modal" onClick={(e) => e.stopPropagation()}>
+            {!addMode && !form && (
+              <div className="mode-choice">
+                <p className="mode-title">How do you want to add it?</p>
+                <button className="mode-btn" onClick={() => fileInputRef.current?.click()}>
+                  📷 Photo or screenshot
+                </button>
+                <button className="mode-btn" onClick={() => setAddMode("type")}>
+                  ⌨️ Type it in
+                </button>
+              </div>
+            )}
+
+            {addMode === "type" && !form && !analyzing && (
+              <div className="type-entry">
+                <label>
+                  Name it
+                  <input
+                    autoFocus
+                    placeholder="e.g. Allagash White, Kim Crawford Sauvignon Blanc..."
+                    value={typedName}
+                    onChange={(e) => setTypedName(e.target.value)}
+                    onKeyDown={(e) => e.key === "Enter" && handleTypedSubmit()}
+                  />
+                </label>
+                <div className="modal-actions">
+                  <button onClick={() => setAddMode(null)} className="secondary">Back</button>
+                  <button onClick={handleTypedSubmit} disabled={!typedName.trim()}>
+                    Look it up
+                  </button>
+                </div>
+              </div>
+            )}
+
             {pendingPhoto?.previewUrl && <img className="preview" src={pendingPhoto.previewUrl} alt="" />}
             {analyzing ? (
-              <p className="analyzing">Analyzing photo…</p>
+              <p className="analyzing">{addMode === "type" ? "Looking it up…" : "Analyzing photo…"}</p>
             ) : form ? (
               <div className="form">
                 <label>
