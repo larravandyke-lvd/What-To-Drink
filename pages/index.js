@@ -1,12 +1,31 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 
-const CATEGORIES = ["Beer", "Wine", "Sake", "Spirits", "Cordials & Digestifs", "Cocktails"];
+const CATEGORIES = ["Beer", "Wine", "Sake", "Spirits", "Cordials & Digestifs", "Cocktails", "Jello Shots"];
 const REACTIONS = [
   { value: "up", icon: "👍" },
   { value: "sideways", icon: "🤷" },
   { value: "down", icon: "👎" },
 ];
 const PEOPLE = ["Eric", "Elthon", "Larra", "Dan V", "Jason"];
+
+function emptyForm() {
+  return {
+    name: "",
+    category: CATEGORIES[0],
+    tags: "",
+    abv: "",
+    region: "",
+    producer: "",
+    notes: "",
+    pairing: "",
+    rating: "",
+    ratingScale: "",
+    ratingSource: "",
+    ratingLink: "",
+    similar: "",
+    addedBy: PEOPLE[0],
+  };
+}
 
 function fileToBase64(file) {
   return new Promise((resolve, reject) => {
@@ -26,13 +45,12 @@ export default function Home() {
   const [activeTag, setActiveTag] = useState(null);
   const [search, setSearch] = useState("");
   const [showAdd, setShowAdd] = useState(false);
-  const [addMode, setAddMode] = useState(null); // null | "photo" | "type"
-  const [typedName, setTypedName] = useState("");
   const [analyzing, setAnalyzing] = useState(false);
   const [saving, setSaving] = useState(false);
   const [pendingPhoto, setPendingPhoto] = useState(null); // { base64, mediaType, previewUrl }
-  const [form, setForm] = useState(null);
-  const fileInputRef = useRef(null);
+  const [form, setForm] = useState(emptyForm());
+  const cameraInputRef = useRef(null);
+  const libraryInputRef = useRef(null);
 
   async function loadItems() {
     try {
@@ -88,16 +106,13 @@ export default function Home() {
     return Array.from(set).sort();
   }, [items, activeCategory]);
 
-  async function handleFile(e) {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    setAddMode("photo");
+  async function processImageFile(file) {
     setAnalyzing(true);
-    setShowAdd(true);
     try {
       const base64 = await fileToBase64(file);
       const previewUrl = URL.createObjectURL(file);
       setPendingPhoto({ base64, mediaType: file.type || "image/jpeg", previewUrl });
+
       const res = await fetch("/api/analyze-image", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -105,7 +120,6 @@ export default function Home() {
       });
       const json = await res.json();
 
-      // Second pass: enrich with a web-search-backed lookup, same pattern as What To Watch
       let enriched = {};
       if (json.name) {
         try {
@@ -121,9 +135,10 @@ export default function Home() {
       }
 
       const merged = { ...json, ...enriched };
-      setForm({
-        name: json.name || "",
-        category: CATEGORIES.includes(merged.category) ? merged.category : CATEGORIES[0],
+      setForm((prev) => ({
+        ...prev,
+        name: json.name || prev.name,
+        category: CATEGORIES.includes(merged.category) ? merged.category : prev.category,
         tags: (merged.tags || []).join(", "),
         abv: merged.abv || "",
         region: merged.region || "",
@@ -135,43 +150,45 @@ export default function Home() {
         ratingSource: merged.ratingSource || "",
         ratingLink: merged.ratingLink || "",
         similar: (merged.similar || []).join(", "),
-        addedBy: PEOPLE[0],
-      });
-    } catch (err) {
-      setForm({
-        name: "",
-        category: CATEGORIES[0],
-        tags: "",
-        abv: "",
-        region: "",
-        producer: "",
-        notes: "",
-        pairing: "",
-        rating: "",
-        ratingScale: "",
-        ratingSource: "",
-        ratingLink: "",
-        similar: "",
-        addedBy: PEOPLE[0],
-      });
+      }));
+    } catch {
+      // leave the form as-is; person can fill in manually
     } finally {
       setAnalyzing(false);
     }
   }
 
-  async function handleTypedSubmit() {
-    if (!typedName.trim()) return;
+  function handleFileInputChange(e) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    processImageFile(file);
+  }
+
+  function handlePaste(e) {
+    const clipItems = e.clipboardData?.items;
+    if (!clipItems) return;
+    for (const item of clipItems) {
+      if (item.type.startsWith("image/")) {
+        const file = item.getAsFile();
+        if (file) processImageFile(file);
+        break;
+      }
+    }
+  }
+
+  async function handleLookup() {
+    if (!form.name.trim()) return;
     setAnalyzing(true);
     try {
       const enrichRes = await fetch("/api/enrich", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: typedName.trim() }),
+        body: JSON.stringify({ name: form.name.trim(), category: form.category }),
       });
       const enriched = await enrichRes.json();
-      setForm({
-        name: typedName.trim(),
-        category: CATEGORIES.includes(enriched.category) ? enriched.category : CATEGORIES[0],
+      setForm((prev) => ({
+        ...prev,
+        category: CATEGORIES.includes(enriched.category) ? enriched.category : prev.category,
         tags: (enriched.tags || []).join(", "),
         abv: enriched.abv || "",
         region: enriched.region || "",
@@ -181,34 +198,19 @@ export default function Home() {
         rating: enriched.rating || "",
         ratingScale: enriched.ratingScale || "",
         ratingSource: enriched.ratingSource || "",
+        ratingSource: enriched.ratingSource || "",
         ratingLink: enriched.ratingLink || "",
         similar: (enriched.similar || []).join(", "),
-        addedBy: PEOPLE[0],
-      });
+      }));
     } catch {
-      setForm({
-        name: typedName.trim(),
-        category: CATEGORIES[0],
-        tags: "",
-        abv: "",
-        region: "",
-        producer: "",
-        notes: "",
-        pairing: "",
-        rating: "",
-        ratingScale: "",
-        ratingSource: "",
-        ratingLink: "",
-        similar: "",
-        addedBy: PEOPLE[0],
-      });
+      // leave form as-is
     } finally {
       setAnalyzing(false);
     }
   }
 
   async function handleSave() {
-    if (!form) return;
+    if (!form.name.trim()) return;
     setSaving(true);
     try {
       const res = await fetch("/api/drinks", {
@@ -251,7 +253,6 @@ export default function Home() {
     const idx = RATING_CYCLE.indexOf(current || "TBD");
     const next = RATING_CYCLE[(idx + 1) % RATING_CYCLE.length];
 
-    // optimistic local update
     setItems((prev) =>
       prev.map((it) =>
         it.id === itemId ? { ...it, ratings: { ...it.ratings, [person]: next } } : it
@@ -265,13 +266,18 @@ export default function Home() {
     }).catch((err) => alert("Couldn't save that reaction: " + err.message));
   }
 
+  function openAdd() {
+    setForm(emptyForm());
+    setPendingPhoto(null);
+    setShowAdd(true);
+  }
+
   function closeAdd() {
     setShowAdd(false);
-    setAddMode(null);
-    setTypedName("");
-    setForm(null);
+    setForm(emptyForm());
     setPendingPhoto(null);
-    if (fileInputRef.current) fileInputRef.current.value = "";
+    if (cameraInputRef.current) cameraInputRef.current.value = "";
+    if (libraryInputRef.current) libraryInputRef.current.value = "";
   }
 
   function togglePersonFilter(person) {
@@ -290,16 +296,11 @@ export default function Home() {
             <p>Snap a bottle, glass, or menu — we'll fill in the rest.</p>
           </div>
         </div>
-        <button className="add-btn" onClick={() => setShowAdd(true)}>
+        <button className="add-btn" onClick={openAdd}>
           + Add something
         </button>
-        <input
-          ref={fileInputRef}
-          type="file"
-          accept="image/*"
-          hidden
-          onChange={handleFile}
-        />
+        <input ref={cameraInputRef} type="file" accept="image/*" capture="environment" hidden onChange={handleFileInputChange} />
+        <input ref={libraryInputRef} type="file" accept="image/*" hidden onChange={handleFileInputChange} />
       </header>
 
       <div className="search-row">
@@ -391,7 +392,7 @@ export default function Home() {
               <div className="card-photo">
                 <img src={it.photoURL} alt={it.name} />
                 {it.rating && (
-                  <a
+                  
                     className="rating-badge"
                     href={it.ratingLink || undefined}
                     target="_blank"
@@ -444,6 +445,14 @@ export default function Home() {
                 })}
               </div>
               {it.addedBy && <p className="added-by">Added by {it.addedBy}</p>}
+              {it.createdAt && (
+                <p className="added-date">
+                  {new Date(it.createdAt).toLocaleString(undefined, {
+                    dateStyle: "medium",
+                    timeStyle: "short",
+                  })}
+                </p>
+              )}
             </div>
           </div>
         ))}
@@ -452,123 +461,153 @@ export default function Home() {
 
       {showAdd && (
         <div className="modal-overlay" onClick={closeAdd}>
-          <div className="modal" onClick={(e) => e.stopPropagation()}>
-            {!addMode && !form && (
-              <div className="mode-choice">
-                <p className="mode-title">How do you want to add it?</p>
-                <button className="mode-btn" onClick={() => fileInputRef.current?.click()}>
-                  📷 Photo or screenshot
-                </button>
-                <button className="mode-btn" onClick={() => setAddMode("type")}>
-                  ⌨️ Type it in
-                </button>
-              </div>
-            )}
+          <div className="modal wide" onClick={(e) => e.stopPropagation()} onPaste={handlePaste}>
+            <div className="modal-header-row">
+              <h2>Add something</h2>
+              <button className="close-x" onClick={closeAdd}>✕ Close</button>
+            </div>
 
-            {addMode === "type" && !form && !analyzing && (
-              <div className="type-entry">
-                <label>
-                  Name it
-                  <input
-                    autoFocus
-                    placeholder="e.g. Allagash White, Kim Crawford Sauvignon Blanc..."
-                    value={typedName}
-                    onChange={(e) => setTypedName(e.target.value)}
-                    onKeyDown={(e) => e.key === "Enter" && handleTypedSubmit()}
-                  />
-                </label>
-                <div className="modal-actions">
-                  <button onClick={() => setAddMode(null)} className="secondary">Back</button>
-                  <button onClick={handleTypedSubmit} disabled={!typedName.trim()}>
-                    Look it up
-                  </button>
-                </div>
-              </div>
-            )}
+            <div className="method-grid">
+              <button className="method-btn" onClick={() => document.getElementById("dw-name-input")?.focus()}>
+                <span className="method-icon">⌨️</span>
+                <span>Type it</span>
+              </button>
+              <button className="method-btn" onClick={() => cameraInputRef.current?.click()}>
+                <span className="method-icon">📷</span>
+                <span>Take a pic</span>
+              </button>
+              <button className="method-btn" onClick={() => libraryInputRef.current?.click()}>
+                <span className="method-icon">🖼️</span>
+                <span>Screenshot / Upload</span>
+              </button>
+              <button
+                className="method-btn"
+                onClick={async () => {
+                  try {
+                    const clipboardItems = await navigator.clipboard.read();
+                    for (const item of clipboardItems) {
+                      const type = item.types.find((t) => t.startsWith("image/"));
+                      if (type) {
+                        const blob = await item.getType(type);
+                        processImageFile(blob);
+                        return;
+                      }
+                    }
+                    alert("No image found on your clipboard.");
+                  } catch {
+                    alert("Couldn't read the clipboard — try Cmd+V inside this window instead.");
+                  }
+                }}
+              >
+                <span className="method-icon">📋</span>
+                <span>Paste image</span>
+              </button>
+            </div>
 
             {pendingPhoto?.previewUrl && <img className="preview" src={pendingPhoto.previewUrl} alt="" />}
-            {analyzing ? (
-              <p className="analyzing">{addMode === "type" ? "Looking it up…" : "Analyzing photo…"}</p>
-            ) : form ? (
-              <div className="form">
-                <label>
-                  Name
-                  <input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
-                </label>
-                <label>
-                  Category
-                  <select
-                    value={form.category}
-                    onChange={(e) => setForm({ ...form, category: e.target.value })}
-                  >
-                    {CATEGORIES.map((c) => (
-                      <option key={c} value={c}>{c}</option>
-                    ))}
-                  </select>
-                </label>
-                <label>
-                  Tags (comma separated)
-                  <input value={form.tags} onChange={(e) => setForm({ ...form, tags: e.target.value })} />
-                </label>
-                <label>
-                  ABV
-                  <input value={form.abv} onChange={(e) => setForm({ ...form, abv: e.target.value })} />
-                </label>
-                <label>
-                  Region
-                  <input value={form.region} onChange={(e) => setForm({ ...form, region: e.target.value })} />
-                </label>
-                <label>
-                  Producer
-                  <input value={form.producer} onChange={(e) => setForm({ ...form, producer: e.target.value })} />
-                </label>
-                <label>
-                  Notes
-                  <textarea value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} />
-                </label>
-                <label>
-                  Pairing
-                  <input value={form.pairing} onChange={(e) => setForm({ ...form, pairing: e.target.value })} />
-                </label>
-                <label>
-                  Rating
+            {analyzing && <p className="analyzing">Looking it up…</p>}
+
+            <div className="form">
+              <label>
+                Name
+                <div className="name-row">
                   <input
-                    placeholder="e.g. 4.2"
-                    value={form.rating}
-                    onChange={(e) => setForm({ ...form, rating: e.target.value })}
+                    id="dw-name-input"
+                    placeholder="e.g. Allagash White, Kim Crawford Sauvignon Blanc..."
+                    value={form.name}
+                    onChange={(e) => setForm({ ...form, name: e.target.value })}
+                    onKeyDown={(e) => e.key === "Enter" && handleLookup()}
                   />
-                </label>
-                <label>
-                  Rating source
-                  <input
-                    placeholder="e.g. Vivino, Untappd, Distiller"
-                    value={form.ratingSource}
-                    onChange={(e) => setForm({ ...form, ratingSource: e.target.value })}
-                  />
-                </label>
-                <label>
-                  If you like this, try (comma separated)
-                  <input value={form.similar} onChange={(e) => setForm({ ...form, similar: e.target.value })} />
-                </label>
-                <label>
-                  Added by
-                  <select
-                    value={form.addedBy}
-                    onChange={(e) => setForm({ ...form, addedBy: e.target.value })}
-                  >
-                    {PEOPLE.map((p) => (
-                      <option key={p} value={p}>{p}</option>
-                    ))}
-                  </select>
-                </label>
-                <div className="modal-actions">
-                  <button onClick={closeAdd} className="secondary">Cancel</button>
-                  <button onClick={handleSave} disabled={saving}>
-                    {saving ? "Saving…" : "Save"}
+                  <button className="lookup-btn" onClick={handleLookup} disabled={!form.name.trim() || analyzing}>
+                    Look up
                   </button>
                 </div>
+              </label>
+
+              <label>
+                Category
+                <div className="pill-row">
+                  {CATEGORIES.map((c) => (
+                    <button
+                      key={c}
+                      type="button"
+                      className={`pill ${form.category === c ? "active" : ""}`}
+                      onClick={() => setForm({ ...form, category: c })}
+                    >
+                      {c}
+                    </button>
+                  ))}
+                </div>
+              </label>
+
+              <label>
+                Added by
+                <div className="pill-row">
+                  {PEOPLE.map((p) => (
+                    <button
+                      key={p}
+                      type="button"
+                      className={`pill ${form.addedBy === p ? "active" : ""}`}
+                      onClick={() => setForm({ ...form, addedBy: p })}
+                    >
+                      {p}
+                    </button>
+                  ))}
+                </div>
+              </label>
+
+              <label>
+                Tags (comma separated)
+                <input value={form.tags} onChange={(e) => setForm({ ...form, tags: e.target.value })} />
+              </label>
+              <label>
+                ABV
+                <input value={form.abv} onChange={(e) => setForm({ ...form, abv: e.target.value })} />
+              </label>
+              <label>
+                Region
+                <input value={form.region} onChange={(e) => setForm({ ...form, region: e.target.value })} />
+              </label>
+              <label>
+                Producer
+                <input value={form.producer} onChange={(e) => setForm({ ...form, producer: e.target.value })} />
+              </label>
+              <label>
+                What it's about
+                <textarea value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} />
+              </label>
+              <label>
+                Pairing
+                <input value={form.pairing} onChange={(e) => setForm({ ...form, pairing: e.target.value })} />
+              </label>
+              <label>
+                Rating
+                <input
+                  placeholder="e.g. 4.2"
+                  value={form.rating}
+                  onChange={(e) => setForm({ ...form, rating: e.target.value })}
+                />
+              </label>
+              <label>
+                Rating source
+                <input
+                  placeholder="e.g. Vivino, Untappd, Distiller"
+                  value={form.ratingSource}
+                  onChange={(e) => setForm({ ...form, ratingSource: e.target.value })}
+                />
+              </label>
+              <label>
+                If you like this, try (comma separated)
+                <input value={form.similar} onChange={(e) => setForm({ ...form, similar: e.target.value })} />
+              </label>
+
+              <div className="modal-actions">
+                <button onClick={closeAdd} className="secondary">Cancel</button>
+                <button onClick={handleSave} disabled={saving || !form.name.trim()}>
+                  {saving ? "Saving…" : "Save"}
+                </button>
               </div>
-            ) : null}
+            </div>
           </div>
         </div>
       )}

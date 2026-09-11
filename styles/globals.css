@@ -142,8 +142,46 @@ body {
 .tag { background: rgba(255,255,255,0.06); padding: 2px 8px; border-radius: 6px; font-size: 11px; color: #c9b9a8; }
 .notes { font-size: 13px; color: #d8c9b8; margin: 0 0 6px; line-height: 1.4; }
 .added-by { font-size: 11px; color: #8a7a6a; margin: 0; }
+.added-date { font-size: 10px; color: #6a5a4a; margin: 2px 0 0; }
 
 .empty { color: #8a7a6a; grid-column: 1 / -1; text-align: center; padding: 40px 0; }
+
+.modal.wide { max-width: 640px; }
+.modal-header-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+.modal-header-row h2 { margin: 0; font-size: 20px; color: var(--amber); }
+.close-x {
+  background: none; border: 1px solid var(--line); color: var(--cream);
+  padding: 6px 12px; border-radius: 999px; font-size: 12px; cursor: pointer;
+}
+
+.method-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+.method-btn {
+  display: flex; flex-direction: column; align-items: center; gap: 6px;
+  background: var(--bg); border: 1px solid var(--line); border-radius: 10px;
+  padding: 16px 8px; cursor: pointer; color: var(--cream); font-family: inherit; font-size: 13px;
+}
+.method-btn:hover { border-color: var(--amber); }
+.method-icon { font-size: 24px; }
+
+.name-row { display: flex; gap: 8px; }
+.name-row input { flex: 1; }
+.lookup-btn {
+  background: var(--amber); color: #241521; border: none; border-radius: 8px;
+  padding: 0 16px; font-weight: 700; cursor: pointer; white-space: nowrap;
+}
+.lookup-btn:disabled { opacity: 0.5; cursor: default; }
+
+.pill-row { display: flex; flex-wrap: wrap; gap: 6px; }
+.pill {
+  background: transparent; border: 1px solid var(--line); color: var(--cream);
+  padding: 6px 12px; border-radius: 999px; font-size: 13px; cursor: pointer; font-family: inherit;
+}
+.pill.active { background: var(--amber); color: #241521; border-color: var(--amber); }
 
 .mode-choice { display: flex; flex-direction: column; gap: 12px; }
 .mode-title { margin: 0 0 4px; font-size: 15px; color: var(--cream); }
