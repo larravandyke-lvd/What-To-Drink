@@ -407,9 +407,14 @@ body::before {
   gap: 10px;
   text-align: center;
   color: var(--amber);
-  padding: 20px 0;
+  padding: 10px 0;
   font-weight: 700;
   animation: analyzing-pulse 1.2s ease-in-out infinite;
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  background: var(--panel);
+  border-radius: 8px;
 }
 .spinner {
   width: 18px;
