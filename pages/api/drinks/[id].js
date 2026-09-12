@@ -32,9 +32,10 @@ export default async function handler(req, res) {
     try {
       const { author, text, tags } = body;
       if (!text || !text.trim()) return res.status(400).json({ error: "note text required" });
+      if (!author) return res.status(400).json({ error: "author required" });
 
       const comment = {
-        author: author || null,
+        author,
         text: text.trim(),
         tags: tags || [],
         createdAt: new Date().toISOString(),
@@ -56,7 +57,7 @@ export default async function handler(req, res) {
   if (body.edit) {
     try {
       const {
-        name, category, tags, abv, region, producer, notes, pairing,
+        name, category, tags, abv, region, producer, producerUrl, notes, pairing,
         rating, ratingScale, ratingSource, ratingLink, similar, addedBy,
         base64, mediaType, existingPhotoUrl,
       } = body;
@@ -80,6 +81,7 @@ export default async function handler(req, res) {
           abv = ${abv},
           region = ${region},
           producer = ${producer},
+          producer_url = ${producerUrl},
           notes = ${notes},
           pairing = ${pairing},
           rating = ${rating},
