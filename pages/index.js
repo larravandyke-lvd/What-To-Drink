@@ -8,6 +8,24 @@ const REACTIONS = [
 ];
 const PEOPLE = ["Eric", "Elthon", "Larra", "Dan V", "Jason", "Dallas"];
 
+function getLastAddedBy() {
+  if (typeof window === "undefined") return "";
+  try {
+    return localStorage.getItem("wtd_last_added_by") || "";
+  } catch {
+    return "";
+  }
+}
+
+function rememberAddedBy(person) {
+  if (typeof window === "undefined" || !person) return;
+  try {
+    localStorage.setItem("wtd_last_added_by", person);
+  } catch {
+    // ignore storage errors
+  }
+}
+
 function emptyForm() {
   return {
     name: "",
@@ -24,7 +42,7 @@ function emptyForm() {
     ratingSource: "",
     ratingLink: "",
     similar: "",
-    addedBy: "",
+    addedBy: getLastAddedBy(),
     photoUrl: "",
   };
 }
@@ -177,18 +195,18 @@ export default function Home() {
         ...form,
         name: merged.name || json.name || form.name,
         category: CATEGORIES.includes(merged.category) ? merged.category : form.category,
-        tags: (merged.tags || []).join(", "),
-        abv: merged.abv || "",
-        region: merged.region || "",
-        producer: merged.producer || "",
-        producerUrl: merged.producerUrl || "",
-        notes: merged.notes || "",
-        pairing: merged.pairing || "",
-        rating: merged.rating || "",
-        ratingScale: merged.ratingScale || "",
-        ratingSource: merged.ratingSource || "",
-        ratingLink: merged.ratingLink || "",
-        similar: (merged.similar || []).join(", "),
+        tags: merged.tags?.length ? merged.tags.join(", ") : form.tags,
+        abv: merged.abv || form.abv,
+        region: merged.region || form.region,
+        producer: merged.producer || form.producer,
+        producerUrl: merged.producerUrl || form.producerUrl,
+        notes: merged.notes || form.notes,
+        pairing: merged.pairing || form.pairing,
+        rating: merged.rating || form.rating,
+        ratingScale: merged.ratingScale || form.ratingScale,
+        ratingSource: merged.ratingSource || form.ratingSource,
+        ratingLink: merged.ratingLink || form.ratingLink,
+        similar: merged.similar?.length ? merged.similar.join(", ") : form.similar,
       };
       setForm(finalForm);
     } catch {
@@ -234,18 +252,18 @@ export default function Home() {
         ...form,
         name: enriched.name || form.name,
         category: CATEGORIES.includes(enriched.category) ? enriched.category : form.category,
-        tags: (enriched.tags || []).join(", "),
-        abv: enriched.abv || "",
-        region: enriched.region || "",
-        producer: enriched.producer || "",
-        producerUrl: enriched.producerUrl || "",
-        notes: enriched.notes || "",
-        pairing: enriched.pairing || "",
-        rating: enriched.rating || "",
-        ratingScale: enriched.ratingScale || "",
-        ratingSource: enriched.ratingSource || "",
-        ratingLink: enriched.ratingLink || "",
-        similar: (enriched.similar || []).join(", "),
+        tags: enriched.tags?.length ? enriched.tags.join(", ") : form.tags,
+        abv: enriched.abv || form.abv,
+        region: enriched.region || form.region,
+        producer: enriched.producer || form.producer,
+        producerUrl: enriched.producerUrl || form.producerUrl,
+        notes: enriched.notes || form.notes,
+        pairing: enriched.pairing || form.pairing,
+        rating: enriched.rating || form.rating,
+        ratingScale: enriched.ratingScale || form.ratingScale,
+        ratingSource: enriched.ratingSource || form.ratingSource,
+        ratingLink: enriched.ratingLink || form.ratingLink,
+        similar: enriched.similar?.length ? enriched.similar.join(", ") : form.similar,
         photoUrl: enriched.photoUrl || form.photoUrl,
       };
       setForm(finalForm);
@@ -305,6 +323,7 @@ export default function Home() {
         const err = await res.json();
         throw new Error(err.error || "save failed");
       }
+      rememberAddedBy(form.addedBy);
       await loadItems();
       closeAdd();
     } catch (err) {
@@ -435,6 +454,7 @@ export default function Home() {
           body: JSON.stringify(payload),
         });
       }
+      rememberAddedBy(finalForm.addedBy);
       await loadItems();
     } catch {
       // best-effort background save — user isn't watching, fail silently
