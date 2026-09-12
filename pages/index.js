@@ -60,6 +60,12 @@ export default function Home() {
   const [postingNote, setPostingNote] = useState(null);
   const cameraInputRef = useRef(null);
   const libraryInputRef = useRef(null);
+  const showAddRef = useRef(showAdd);
+  showAddRef.current = showAdd;
+  const editingIdRef = useRef(editingId);
+  editingIdRef.current = editingId;
+  const pendingPhotoRef = useRef(pendingPhoto);
+  pendingPhotoRef.current = pendingPhoto;
 
   async function loadItems() {
     try {
@@ -136,10 +142,14 @@ export default function Home() {
 
   async function processImageFile(file) {
     setAnalyzing(true);
+    let finalForm = form;
+    const photoObj = { base64: null, mediaType: file.type || "image/jpeg", previewUrl: null };
     try {
       const base64 = await fileToBase64(file);
       const previewUrl = URL.createObjectURL(file);
-      setPendingPhoto({ base64, mediaType: file.type || "image/jpeg", previewUrl });
+      photoObj.base64 = base64;
+      photoObj.previewUrl = previewUrl;
+      setPendingPhoto(photoObj);
 
       const res = await fetch("/api/analyze-image", {
         method: "POST",
@@ -163,10 +173,10 @@ export default function Home() {
       }
 
       const merged = { ...json, ...enriched };
-      setForm((prev) => ({
-        ...prev,
-        name: merged.name || json.name || prev.name,
-        category: CATEGORIES.includes(merged.category) ? merged.category : prev.category,
+      finalForm = {
+        ...form,
+        name: merged.name || json.name || form.name,
+        category: CATEGORIES.includes(merged.category) ? merged.category : form.category,
         tags: (merged.tags || []).join(", "),
         abv: merged.abv || "",
         region: merged.region || "",
@@ -179,11 +189,15 @@ export default function Home() {
         ratingSource: merged.ratingSource || "",
         ratingLink: merged.ratingLink || "",
         similar: (merged.similar || []).join(", "),
-      }));
+      };
+      setForm(finalForm);
     } catch {
       // leave the form as-is; person can fill in manually
     } finally {
       setAnalyzing(false);
+      if (!showAddRef.current) {
+        await finishBackgroundSave(finalForm, editingIdRef.current, photoObj.base64 ? photoObj : pendingPhotoRef.current);
+      }
     }
   }
 
@@ -208,6 +222,7 @@ export default function Home() {
   async function handleLookup() {
     if (!form.name.trim()) return;
     setAnalyzing(true);
+    let finalForm = form;
     try {
       const enrichRes = await fetch("/api/enrich", {
         method: "POST",
@@ -215,10 +230,10 @@ export default function Home() {
         body: JSON.stringify({ name: form.name.trim(), category: form.category }),
       });
       const enriched = await enrichRes.json();
-      setForm((prev) => ({
-        ...prev,
-        name: enriched.name || prev.name,
-        category: CATEGORIES.includes(enriched.category) ? enriched.category : prev.category,
+      finalForm = {
+        ...form,
+        name: enriched.name || form.name,
+        category: CATEGORIES.includes(enriched.category) ? enriched.category : form.category,
         tags: (enriched.tags || []).join(", "),
         abv: enriched.abv || "",
         region: enriched.region || "",
@@ -231,12 +246,16 @@ export default function Home() {
         ratingSource: enriched.ratingSource || "",
         ratingLink: enriched.ratingLink || "",
         similar: (enriched.similar || []).join(", "),
-        photoUrl: enriched.photoUrl || prev.photoUrl,
-      }));
+        photoUrl: enriched.photoUrl || form.photoUrl,
+      };
+      setForm(finalForm);
     } catch {
       // leave form as-is
     } finally {
       setAnalyzing(false);
+      if (!showAddRef.current) {
+        await finishBackgroundSave(finalForm, editingIdRef.current, pendingPhotoRef.current);
+      }
     }
   }
 
@@ -375,6 +394,57 @@ export default function Home() {
     }
   }
 
+  async function finishBackgroundSave(finalForm, eid, photo) {
+    if (!finalForm.name?.trim() || !finalForm.addedBy) {
+      setForm(emptyForm());
+      setPendingPhoto(null);
+      setEditingId(null);
+      return;
+    }
+    const payload = {
+      name: finalForm.name,
+      category: finalForm.category,
+      tags: finalForm.tags.split(",").map((t) => t.trim()).filter(Boolean),
+      abv: finalForm.abv,
+      region: finalForm.region,
+      producer: finalForm.producer,
+      producerUrl: finalForm.producerUrl,
+      notes: finalForm.notes,
+      pairing: finalForm.pairing,
+      rating: finalForm.rating,
+      ratingScale: finalForm.ratingScale,
+      ratingSource: finalForm.ratingSource,
+      ratingLink: finalForm.ratingLink,
+      similar: finalForm.similar.split(",").map((s) => s.trim()).filter(Boolean),
+      addedBy: finalForm.addedBy,
+      base64: photo?.base64 || null,
+      mediaType: photo?.mediaType || null,
+      existingPhotoUrl: !photo && finalForm.photoUrl ? finalForm.photoUrl : null,
+    };
+    try {
+      if (eid) {
+        await fetch(`/api/drinks/${eid}`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ edit: true, ...payload }),
+        });
+      } else {
+        await fetch("/api/drinks", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+      }
+      await loadItems();
+    } catch {
+      // best-effort background save — user isn't watching, fail silently
+    } finally {
+      setForm(emptyForm());
+      setPendingPhoto(null);
+      setEditingId(null);
+    }
+  }
+
   function openAdd() {
     setEditingId(null);
     setForm(emptyForm());
@@ -408,11 +478,13 @@ export default function Home() {
 
   function closeAdd() {
     setShowAdd(false);
-    setEditingId(null);
-    setForm(emptyForm());
-    setPendingPhoto(null);
     if (cameraInputRef.current) cameraInputRef.current.value = "";
     if (libraryInputRef.current) libraryInputRef.current.value = "";
+    if (!analyzing) {
+      setEditingId(null);
+      setForm(emptyForm());
+      setPendingPhoto(null);
+    }
   }
 
   function togglePersonFilter(person) {
