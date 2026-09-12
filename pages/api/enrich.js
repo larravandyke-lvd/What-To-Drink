@@ -118,7 +118,9 @@ Use current, accurate information. If you can't confidently identify the drink, 
         const foundByProducer = await tryWikipedia(json.producer, "Wikipedia (producer)");
         if (!foundByProducer) {
           const stripped = json.producer
-            .replace(/\b(Distillery|Distillers|Distilling( Co\.?| Company)?|Brewing( Co\.?| Company)?|Brewery|Winery|Wines?|Spirits( Co\.?| Company)?)\b/gi, "")
+            .replace(/\([^)]*\)/g, "")
+            .replace(/\b(Distillery|Distillers|Distilling( Co\.?| Company)?|Brewing( Co\.?| Company)?|Brewery|Winery|Wines?|Spirits( Co\.?| Company)?|Company)\b/gi, "")
+            .replace(/^\s*The\s+/i, "")
             .replace(/\s{2,}/g, " ")
             .trim();
           if (stripped && stripped.toLowerCase() !== json.producer.toLowerCase()) {
