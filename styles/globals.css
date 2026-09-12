@@ -61,15 +61,20 @@ body::before {
 .header-actions { display: flex; align-items: center; justify-content: center; gap: 8px; }
 .top-bar { display: flex; align-items: center; justify-content: space-between; }
 .refresh-btn {
-  background: var(--panel);
-  border: 1px solid var(--line);
-  color: var(--amber);
+  position: fixed;
+  top: 24px;
+  right: 24px;
   width: 40px; height: 40px;
-  border-radius: 999px;
+  border-radius: 50%;
+  background: var(--amber);
+  color: #faf7f1;
+  border: none;
   display: flex; align-items: center; justify-content: center;
   cursor: pointer;
+  box-shadow: 0 4px 14px rgba(0,0,0,0.4);
+  z-index: 20;
 }
-.refresh-btn:hover { border-color: var(--amber); background: rgba(139,58,58,0.06); }
+.refresh-btn:hover { background: var(--amber-dim); }
 
 .eyebrow {
   margin: 0;
