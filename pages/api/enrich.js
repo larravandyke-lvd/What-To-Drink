@@ -115,7 +115,16 @@ Use current, accurate information. If you can't confidently identify the drink, 
     if (!json.photoUrl) {
       const foundByName = await tryWikipedia(lookupName, "Wikipedia (product)");
       if (!foundByName && json.producer) {
-        await tryWikipedia(json.producer, "Wikipedia (producer)");
+        const foundByProducer = await tryWikipedia(json.producer, "Wikipedia (producer)");
+        if (!foundByProducer) {
+          const stripped = json.producer
+            .replace(/\b(Distillery|Distillers|Distilling( Co\.?| Company)?|Brewing( Co\.?| Company)?|Brewery|Winery|Wines?|Spirits( Co\.?| Company)?)\b/gi, "")
+            .replace(/\s{2,}/g, " ")
+            .trim();
+          if (stripped && stripped.toLowerCase() !== json.producer.toLowerCase()) {
+            await tryWikipedia(stripped, "Wikipedia (producer, short)");
+          }
+        }
       }
     }
 
