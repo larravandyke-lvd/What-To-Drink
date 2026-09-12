@@ -260,6 +260,7 @@ export default function Home() {
   }
 
   async function handleSave() {
+    if (analyzing) return;
     if (!form.name.trim()) {
       alert("Give it a name before saving.");
       return;
@@ -978,7 +979,7 @@ export default function Home() {
 
               <div className="modal-actions">
                 <button onClick={closeAdd} className="secondary">Cancel</button>
-                <button onClick={handleSave} disabled={saving}>
+                <button onClick={handleSave} disabled={saving || analyzing}>
                   {saving ? "Saving…" : editingId ? "Save changes" : "Save"}
                 </button>
               </div>
