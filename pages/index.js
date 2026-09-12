@@ -784,7 +784,12 @@ export default function Home() {
             ) : form.photoUrl ? (
               <img className="preview" src={form.photoUrl} alt="" />
             ) : null}
-            {analyzing && <p className="analyzing">Looking it up…</p>}
+            {analyzing && (
+              <p className="analyzing">
+                <span className="spinner" />
+                Looking it up…
+              </p>
+            )}
 
             <div className="form">
               <label>
