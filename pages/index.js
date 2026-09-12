@@ -65,6 +65,7 @@ export default function Home() {
   const editingIdRef = useRef(editingId);
   editingIdRef.current = editingId;
   const pendingPhotoRef = useRef(pendingPhoto);
+  const addedByRef = useRef(null);
   pendingPhotoRef.current = pendingPhoto;
 
   async function loadItems() {
@@ -285,6 +286,7 @@ export default function Home() {
     }
     if (!form.addedBy) {
       alert("Pick who's adding this before saving.");
+      addedByRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
       return;
     }
     setSaving(true);
@@ -707,9 +709,10 @@ export default function Home() {
                         href={it.producerUrl}
                         target="_blank"
                         rel="noreferrer"
+                        className="producer-link"
                         onClick={(e) => e.stopPropagation()}
                       >
-                        {it.producer}
+                        {it.producer} ↗
                       </a>
                     ) : (
                       it.producer
@@ -925,7 +928,7 @@ export default function Home() {
                 </div>
               </label>
 
-              <label>
+              <label ref={addedByRef}>
                 Added by
                 <div className="pill-row">
                   {PEOPLE.map((p) => (
