@@ -26,24 +26,27 @@ Use current, accurate information. If you can't confidently identify the drink, 
               "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0 Safari/537.36",
           },
         });
-        if (!imgRes.ok) return null;
+        if (!imgRes.ok) return { error: `fetch failed: ${imgRes.status} ${imgRes.statusText}` };
         const contentType = imgRes.headers.get("content-type") || "";
-        if (!contentType.startsWith("image/")) return null;
+        if (!contentType.startsWith("image/")) return { error: `not an image: content-type was "${contentType}"` };
         const buffer = Buffer.from(await imgRes.arrayBuffer());
         const ext = contentType.split("/")[1]?.split(";")[0] || "jpg";
         const blob = await put(`drinks/${Date.now()}.${ext}`, buffer, {
           access: "public",
           contentType,
         });
-        return blob.url;
-      } catch {
-        return null;
+        return { url: blob.url };
+      } catch (e) {
+        return { error: `exception: ${e.message}` };
       }
     }
 
+    const debugImages = [];
+
     if (json.imageUrl) {
       const hosted = await tryHostImage(json.imageUrl);
-      if (hosted) json.photoUrl = hosted;
+      debugImages.push({ source: "AI-suggested", url: json.imageUrl, result: hosted });
+      if (hosted.url) json.photoUrl = hosted.url;
       delete json.imageUrl;
     }
 
@@ -60,13 +63,20 @@ Use current, accurate information. If you can't confidently identify the drink, 
           const thumb = wikiJson.thumbnail?.source || wikiJson.originalimage?.source;
           if (thumb) {
             const hosted = await tryHostImage(thumb);
-            if (hosted) json.photoUrl = hosted;
+            debugImages.push({ source: "Wikipedia", url: thumb, result: hosted });
+            if (hosted.url) json.photoUrl = hosted.url;
+          } else {
+            debugImages.push({ source: "Wikipedia", error: "page found but no thumbnail" });
           }
+        } else {
+          debugImages.push({ source: "Wikipedia", error: `page fetch failed: ${wikiRes.status}` });
         }
-      } catch {
-        // no Wikipedia page or fetch failed — that's fine, card falls back to the icon
+      } catch (e) {
+        debugImages.push({ source: "Wikipedia", error: `exception: ${e.message}` });
       }
     }
+
+    json._debugImages = debugImages;
 
     res.status(200).json(json);
   } catch (e) {
