@@ -120,17 +120,21 @@ body::before {
 }
 .clear-filters-btn:hover { background: rgba(139,58,58,0.08); }
 .filters-toggle-btn {
-  background: transparent;
-  border: 1px solid var(--line);
-  color: var(--cream);
-  padding: 0 14px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(128,53,57,0.1);
+  border: 1px solid var(--amber);
+  color: var(--amber);
+  padding: 0 16px;
   border-radius: 999px;
   font-size: 13px;
+  font-weight: 700;
   cursor: pointer;
   white-space: nowrap;
   font-family: inherit;
 }
-.filters-toggle-btn:hover { border-color: var(--amber); color: var(--amber); }
+.filters-toggle-btn:hover { background: rgba(128,53,57,0.18); }
 .filters-panel {
   background: var(--panel);
   border: 1px solid var(--line);
@@ -199,7 +203,14 @@ body::before {
 .person-rating.set { color: var(--cream); border-style: solid; border-color: var(--amber-dim); }
 .pr-icon { font-size: 13px; }
 
-.tabs { display: flex; gap: 4px; border-bottom: 1px solid var(--line); margin-bottom: 16px; flex-wrap: wrap; }
+.tabs {
+  display: flex; gap: 4px; flex-wrap: wrap;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 6px;
+  margin-bottom: 16px;
+}
 .tab {
   background: none;
   border: none;
