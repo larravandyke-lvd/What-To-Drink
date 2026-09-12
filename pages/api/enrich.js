@@ -128,8 +128,6 @@ Use current, accurate information. If you can't confidently identify the drink, 
       }
     }
 
-    json._debugImages = debugImages;
-
     res.status(200).json(json);
   } catch (e) {
     res.status(500).json({ error: e.message });
