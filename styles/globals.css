@@ -3,8 +3,8 @@
   --panel: #ffffff;
   --line: #ddd7ca;
   --cream: #2b2823;
-  --amber: #803539;
-  --amber-dim: #662a2d;
+  --amber: #6e2a4a;
+  --amber-dim: #58213a;
   --rust: #4f9e82;
   --font-headline: "Rye", Georgia, serif;
 }
@@ -27,15 +27,15 @@ body::before {
   background-image:
     radial-gradient(circle 26px at 8% 15%, transparent 48%, rgba(120,115,105,0.22) 52%, rgba(120,115,105,0.22) 59%, transparent 64%),
     radial-gradient(circle 16px at 20% 50%, transparent 48%, rgba(120,115,105,0.19) 52%, rgba(120,115,105,0.19) 59%, transparent 64%),
-    radial-gradient(circle 34px at 35% 8%, transparent 48%, rgba(128,53,57,0.25) 52%, rgba(128,53,57,0.25) 58%, transparent 63%),
+    radial-gradient(circle 34px at 35% 8%, transparent 48%, rgba(110,42,74,0.25) 52%, rgba(110,42,74,0.25) 58%, transparent 63%),
     radial-gradient(circle 20px at 50% 35%, transparent 48%, rgba(120,115,105,0.21) 52%, rgba(120,115,105,0.21) 59%, transparent 64%),
     radial-gradient(circle 14px at 65% 65%, transparent 48%, rgba(79,158,130,0.26) 52%, rgba(79,158,130,0.26) 59%, transparent 64%),
     radial-gradient(circle 30px at 78% 18%, transparent 48%, rgba(120,115,105,0.19) 52%, rgba(120,115,105,0.19) 59%, transparent 64%),
-    radial-gradient(circle 18px at 88% 55%, transparent 48%, rgba(128,53,57,0.25) 52%, rgba(128,53,57,0.25) 59%, transparent 64%),
+    radial-gradient(circle 18px at 88% 55%, transparent 48%, rgba(110,42,74,0.25) 52%, rgba(110,42,74,0.25) 59%, transparent 64%),
     radial-gradient(circle 24px at 95% 82%, transparent 48%, rgba(120,115,105,0.21) 52%, rgba(120,115,105,0.21) 59%, transparent 64%),
     radial-gradient(circle 12px at 28% 80%, transparent 48%, rgba(79,158,130,0.26) 52%, rgba(79,158,130,0.26) 59%, transparent 64%),
     radial-gradient(circle 16px at 58% 92%, transparent 48%, rgba(120,115,105,0.19) 52%, rgba(120,115,105,0.19) 59%, transparent 64%),
-    radial-gradient(circle 10px at 12% 68%, transparent 48%, rgba(128,53,57,0.22) 52%, rgba(128,53,57,0.22) 60%, transparent 64%),
+    radial-gradient(circle 10px at 12% 68%, transparent 48%, rgba(110,42,74,0.22) 52%, rgba(110,42,74,0.22) 60%, transparent 64%),
     radial-gradient(circle 22px at 42% 58%, transparent 48%, rgba(79,158,130,0.22) 52%, rgba(79,158,130,0.22) 59%, transparent 64%);
   background-size: 180px 180px;
   background-repeat: repeat;
@@ -49,14 +49,14 @@ body::before {
   gap: 6px;
   color: var(--amber);
   border: 1px solid var(--line);
-  background: rgba(139,58,58,0.06);
+  background: rgba(110,42,74,0.06);
   font-size: 13px;
   font-weight: 600;
   text-decoration: none;
   padding: 6px 14px;
   border-radius: 999px;
 }
-.portal-link:hover { background: rgba(139,58,58,0.12); border-color: var(--amber); }
+.portal-link:hover { background: rgba(110,42,74,0.12); border-color: var(--amber); }
 
 .header-actions { display: flex; align-items: center; justify-content: center; gap: 8px; }
 .top-bar { display: flex; align-items: center; justify-content: space-between; }
@@ -124,7 +124,7 @@ body::before {
   white-space: nowrap;
   font-family: inherit;
 }
-.clear-filters-btn:hover { background: rgba(139,58,58,0.08); }
+.clear-filters-btn:hover { background: rgba(110,42,74,0.08); }
 .tags-toggle-btn {
   display: flex;
   align-items: center;
@@ -143,7 +143,7 @@ body::before {
   font-family: inherit;
   margin-bottom: 12px;
 }
-.tags-toggle-btn:hover { background: rgba(128,53,57,0.08); }
+.tags-toggle-btn:hover { background: rgba(110,42,74,0.08); }
 .filters-panel {
   background: var(--panel);
   border: 1px solid var(--line);
@@ -445,7 +445,18 @@ body::before {
   background: var(--bg); border: 1px solid var(--line); color: var(--cream);
   padding: 8px 10px; border-radius: 8px; font-family: inherit; font-size: 14px;
 }
+.form input::placeholder, .form textarea::placeholder { color: #a8a294; }
 .form textarea { min-height: 60px; resize: vertical; }
+.field-with-link { display: flex; gap: 8px; align-items: center; }
+.field-with-link input { flex: 1; }
+.field-link {
+  color: var(--amber);
+  font-size: 12px;
+  font-weight: 700;
+  text-decoration: none;
+  white-space: nowrap;
+}
+.field-link:hover { text-decoration: underline; }
 
 .modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 6px; }
 .modal-actions button {
