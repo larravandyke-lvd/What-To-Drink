@@ -1,11 +1,11 @@
 :root {
-  --bg: #1c1410;
-  --panel: #f3ead2;
-  --line: #c7a869;
-  --cream: #3b2f22;
-  --amber: #8b3a3a;
-  --amber-dim: #6e2c2c;
-  --rust: #5c6e4a;
+  --bg: #f5ead9;
+  --panel: #fffaf0;
+  --line: #e0c9a6;
+  --cream: #3a2b1e;
+  --amber: #e8734a;
+  --amber-dim: #d15f38;
+  --rust: #4f9e82;
   --font-headline: "Rye", Georgia, serif;
 }
 
@@ -15,36 +15,48 @@ body {
   margin: 0;
   background-color: var(--bg);
   background-image:
-    radial-gradient(circle 3px at 15% 25%, rgba(200,170,120,0.06), transparent),
-    radial-gradient(circle 2px at 35% 65%, rgba(200,170,120,0.05), transparent),
-    radial-gradient(circle 4px at 55% 15%, rgba(200,170,120,0.04), transparent),
-    radial-gradient(circle 2px at 75% 45%, rgba(200,170,120,0.06), transparent),
-    radial-gradient(circle 3px at 90% 75%, rgba(200,170,120,0.05), transparent),
-    radial-gradient(circle 2px at 25% 85%, rgba(200,170,120,0.04), transparent),
-    radial-gradient(circle 3px at 65% 90%, rgba(200,170,120,0.05), transparent),
-    radial-gradient(circle 2px at 5% 55%, rgba(200,170,120,0.04), transparent);
+    radial-gradient(circle 3px at 15% 25%, rgba(232,115,74,0.06), transparent),
+    radial-gradient(circle 2px at 35% 65%, rgba(79,158,130,0.05), transparent),
+    radial-gradient(circle 4px at 55% 15%, rgba(232,115,74,0.04), transparent),
+    radial-gradient(circle 2px at 75% 45%, rgba(79,158,130,0.06), transparent),
+    radial-gradient(circle 3px at 90% 75%, rgba(232,115,74,0.05), transparent),
+    radial-gradient(circle 2px at 25% 85%, rgba(79,158,130,0.04), transparent),
+    radial-gradient(circle 3px at 65% 90%, rgba(232,115,74,0.05), transparent),
+    radial-gradient(circle 2px at 5% 55%, rgba(79,158,130,0.04), transparent);
   background-size: 420px 420px;
   background-repeat: repeat;
   color: var(--cream);
   font-family: Georgia, "Times New Roman", serif;
 }
 
-.page {
-  max-width: 1100px; margin: 24px auto; padding: 24px 20px 60px;
-  background: var(--panel);
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  box-shadow: 0 12px 48px rgba(0,0,0,0.55);
-}
+.page { max-width: 1100px; margin: 0 auto; padding: 24px 20px 60px; }
 
 .portal-link {
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
   color: var(--amber);
+  border: 1px solid var(--line);
+  background: rgba(139,58,58,0.06);
   font-size: 13px;
+  font-weight: 600;
   text-decoration: none;
-  padding: 16px 0 0;
+  padding: 6px 14px;
+  border-radius: 999px;
 }
-.portal-link:hover { text-decoration: underline; }
+.portal-link:hover { background: rgba(139,58,58,0.12); border-color: var(--amber); }
+
+.header-actions { display: flex; align-items: center; gap: 8px; }
+.refresh-btn {
+  background: none;
+  border: 1px solid var(--line);
+  color: var(--amber);
+  width: 40px; height: 40px;
+  border-radius: 999px;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+}
+.refresh-btn:hover { border-color: var(--amber); background: rgba(139,58,58,0.06); }
 
 .eyebrow {
   margin: 0;
@@ -82,9 +94,21 @@ body {
 }
 .add-btn:hover { background: var(--amber-dim); }
 
-.search-row { margin-bottom: 16px; }
+.search-row { margin-bottom: 16px; display: flex; gap: 10px; align-items: center; }
+.clear-filters-btn {
+  background: transparent;
+  border: 1px solid var(--line);
+  color: var(--amber);
+  padding: 0 14px;
+  border-radius: 999px;
+  font-size: 13px;
+  cursor: pointer;
+  white-space: nowrap;
+  font-family: inherit;
+}
+.clear-filters-btn:hover { background: rgba(139,58,58,0.08); }
 .search-input {
-  width: 100%;
+  flex: 1;
   background: var(--panel);
   border: 1px solid var(--line);
   color: var(--cream);
