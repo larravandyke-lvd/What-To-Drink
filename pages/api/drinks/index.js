@@ -18,6 +18,7 @@ export default async function handler(req, res) {
       abv: r.abv,
       region: r.region,
       producer: r.producer,
+      producerUrl: r.producer_url,
       notes: r.notes,
       pairing: r.pairing,
       rating: r.rating,
@@ -37,7 +38,7 @@ export default async function handler(req, res) {
   if (req.method === "POST") {
     try {
       const {
-        name, category, tags, abv, region, producer, notes, pairing,
+        name, category, tags, abv, region, producer, producerUrl, notes, pairing,
         rating, ratingScale, ratingSource, ratingLink, similar, addedBy,
         base64, mediaType, existingPhotoUrl,
       } = req.body || {};
@@ -55,10 +56,10 @@ export default async function handler(req, res) {
 
       const rows = await sql`
         INSERT INTO drinks (
-          name, category, tags, abv, region, producer, notes, pairing,
+          name, category, tags, abv, region, producer, producer_url, notes, pairing,
           rating, rating_scale, rating_source, rating_link, "similar", ratings, added_by, photo_url
         ) VALUES (
-          ${name}, ${category}, ${JSON.stringify(tags || [])}, ${abv}, ${region}, ${producer},
+          ${name}, ${category}, ${JSON.stringify(tags || [])}, ${abv}, ${region}, ${producer}, ${producerUrl},
           ${notes}, ${pairing}, ${rating}, ${ratingScale}, ${ratingSource}, ${ratingLink},
           ${JSON.stringify(similar || [])}, '{}', ${addedBy}, ${photoUrl}
         )
