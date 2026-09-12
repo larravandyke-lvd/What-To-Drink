@@ -577,7 +577,7 @@ export default function Home() {
       </div>
 
       {showFilters && (
-        <>
+        <div className="filters-panel">
           <div className="chip-row">
             <span className="chip-label">Sort</span>
             {[
@@ -651,7 +651,7 @@ export default function Home() {
               ))}
             </div>
           )}
-        </>
+        </div>
       )}
 
       <div className="grid">
