@@ -551,10 +551,6 @@ export default function Home() {
           value={search}
           onChange={(e) => setSearch(e.target.value)}
         />
-        <button className="filters-toggle-btn" onClick={() => setShowFilters((v) => !v)}>
-          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 5h16M7 12h10M10 19h4"/></svg>
-          Filters {showFilters ? "▴" : "▾"}
-        </button>
         {filtersActive && (
           <button className="clear-filters-btn" onClick={clearAllFilters}>
             Clear all filters
@@ -637,6 +633,13 @@ export default function Home() {
           </>
         )}
       </div>
+
+      {tagOptions.length > 0 && (
+        <button className="tags-toggle-btn" onClick={() => setShowFilters((v) => !v)}>
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 5h16M7 12h10M10 19h4"/></svg>
+          Expand Tags {showFilters ? "▴" : "▾"}
+        </button>
+      )}
 
       {showFilters && tagOptions.length > 0 && (
         <div className="filters-panel">
