@@ -3,6 +3,14 @@ import { callClaude, extractJSON } from "../../lib/anthropic";
 
 const CATEGORIES = ["Beer", "Wine", "Sake", "Spirits", "Cordials & Digestifs", "Cocktails"];
 
+// Wikimedia only allows specific thumbnail widths and 400s on arbitrary ones
+// (e.g. the AI might construct ".../800px-File.jpg" which isn't an approved size).
+// The original, full-size file has no such restriction, so rewrite thumb URLs to it.
+function toWikimediaOriginal(url) {
+  const m = url.match(/^(https?:\/\/upload\.wikimedia\.org\/wikipedia\/\w+)\/thumb\/(.+)\/\d+px-[^/]+$/);
+  return m ? `${m[1]}/${m[2]}` : null;
+}
+
 export default async function handler(req, res) {
   if (req.method !== "POST") return res.status(405).json({ error: "POST only" });
   const { name, category } = req.body || {};
@@ -44,7 +52,11 @@ Use current, accurate information. If you can't confidently identify the drink, 
     const debugImages = [];
 
     if (json.imageUrl) {
-      const hosted = await tryHostImage(json.imageUrl);
+      let hosted = await tryHostImage(json.imageUrl);
+      if (hosted.error) {
+        const original = toWikimediaOriginal(json.imageUrl);
+        if (original) hosted = await tryHostImage(original);
+      }
       debugImages.push({ source: "AI-suggested", url: json.imageUrl, result: hosted });
       if (hosted.url) json.photoUrl = hosted.url;
       delete json.imageUrl;
@@ -62,7 +74,11 @@ Use current, accurate information. If you can't confidently identify the drink, 
           const wikiJson = await wikiRes.json();
           const thumb = wikiJson.thumbnail?.source || wikiJson.originalimage?.source;
           if (thumb) {
-            const hosted = await tryHostImage(thumb);
+            let hosted = await tryHostImage(thumb);
+            if (hosted.error) {
+              const original = toWikimediaOriginal(thumb);
+              if (original) hosted = await tryHostImage(original);
+            }
             debugImages.push({ source: "Wikipedia", url: thumb, result: hosted });
             if (hosted.url) json.photoUrl = hosted.url;
           } else {
