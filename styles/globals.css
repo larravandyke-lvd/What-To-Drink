@@ -6,7 +6,7 @@
   --amber: #c1703a;
   --amber-dim: #a45a2b;
   --rust: #6b8f71;
-  --font-headline: "Abril Fatface", Georgia, serif;
+  --font-headline: "Rye", Georgia, serif;
 }
 
 * { box-sizing: border-box; }
@@ -114,19 +114,27 @@ body {
   padding-top: 8px;
   border-top: 1px solid var(--line);
 }
+.rate-hint {
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #6a5a4a;
+  width: 100%;
+  margin-bottom: 2px;
+}
 .person-rating {
   display: flex;
   align-items: center;
   gap: 4px;
   background: rgba(255,255,255,0.04);
-  border: 1px solid var(--line);
+  border: 1px dashed #5a4a3a;
   color: #a08d7a;
   border-radius: 999px;
   padding: 3px 9px;
   font-size: 11px;
   cursor: pointer;
 }
-.person-rating.set { color: var(--cream); border-color: var(--amber-dim); }
+.person-rating.set { color: var(--cream); border-style: solid; border-color: var(--amber-dim); }
 .pr-icon { font-size: 13px; }
 
 .tabs { display: flex; gap: 4px; border-bottom: 1px solid var(--line); margin-bottom: 16px; flex-wrap: wrap; }
@@ -152,7 +160,10 @@ body {
   border: 1px solid var(--line);
   border-radius: 14px;
   overflow: hidden;
+  cursor: pointer;
+  transition: border-color 0.15s ease;
 }
+.card:hover { border-color: var(--amber-dim); }
 .card img { width: 100%; height: 160px; object-fit: cover; display: block; }
 .card-photo { position: relative; }
 .card-photo img { width: 100%; height: 160px; object-fit: cover; display: block; }
@@ -171,7 +182,55 @@ body {
 .tag-list { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; }
 .tag { background: rgba(255,255,255,0.06); padding: 2px 8px; border-radius: 6px; font-size: 11px; color: #c9b9a8; }
 .notes { font-size: 13px; color: #d8c9b8; margin: 0 0 6px; line-height: 1.4; }
-.added-by { font-size: 11px; color: #8a7a6a; margin: 0; }
+.comments-block {
+  margin: 10px 0;
+  padding-top: 10px;
+  border-top: 1px solid var(--line);
+  cursor: default;
+}
+.comment-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 10px; }
+.comment { background: rgba(255,255,255,0.03); border-radius: 8px; padding: 8px 10px; }
+.comment-text { margin: 0; font-size: 13px; color: #d8c9b8; line-height: 1.4; }
+.comment-author { color: var(--amber); font-weight: 700; }
+.comment-tags { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 4px; }
+.comment-tag { font-size: 11px; color: var(--amber-dim); }
+
+.note-form { display: flex; flex-direction: column; gap: 6px; }
+.note-input {
+  background: var(--bg);
+  border: 1px solid var(--line);
+  color: var(--cream);
+  padding: 8px 10px;
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 13px;
+  min-height: 44px;
+  resize: vertical;
+}
+.note-row { display: flex; gap: 8px; align-items: center; }
+.note-author-select {
+  flex: 1;
+  background: var(--bg);
+  border: 1px solid var(--line);
+  color: var(--cream);
+  padding: 6px 8px;
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 12px;
+}
+.note-post-btn {
+  background: var(--amber);
+  color: #241521;
+  border: none;
+  border-radius: 8px;
+  padding: 6px 16px;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.note-post-btn:disabled { opacity: 0.5; cursor: default; }
+.note-tag-row { margin-top: 2px; }
+.pill.small { padding: 3px 9px; font-size: 11px; }
 .added-date { font-size: 10px; color: #6a5a4a; margin: 2px 0 0; }
 
 .photo-fallback {

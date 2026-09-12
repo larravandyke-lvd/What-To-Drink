@@ -26,6 +26,7 @@ export default async function handler(req, res) {
       ratingLink: r.rating_link,
       similar: r.similar || [],
       ratings: r.ratings || {},
+      comments: r.comments || [],
       addedBy: r.added_by,
       photoURL: r.photo_url,
       createdAt: r.created_at,

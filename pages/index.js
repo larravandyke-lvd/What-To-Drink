@@ -6,7 +6,7 @@ const REACTIONS = [
   { value: "sideways", icon: "🤷" },
   { value: "down", icon: "👎" },
 ];
-const PEOPLE = ["Eric", "Elthon", "Larra", "Dan V", "Jason"];
+const PEOPLE = ["Eric", "Elthon", "Larra", "Dan V", "Jason", "Dallas"];
 
 function emptyForm() {
   return {
@@ -52,6 +52,9 @@ export default function Home() {
   const [form, setForm] = useState(emptyForm());
   const [expandedCards, setExpandedCards] = useState({});
   const [showScrollTop, setShowScrollTop] = useState(false);
+  const [editingId, setEditingId] = useState(null);
+  const [noteDrafts, setNoteDrafts] = useState({});
+  const [postingNote, setPostingNote] = useState(null);
   const cameraInputRef = useRef(null);
   const libraryInputRef = useRef(null);
 
@@ -148,7 +151,7 @@ export default function Home() {
       const merged = { ...json, ...enriched };
       setForm((prev) => ({
         ...prev,
-        name: json.name || prev.name,
+        name: merged.name || json.name || prev.name,
         category: CATEGORIES.includes(merged.category) ? merged.category : prev.category,
         tags: (merged.tags || []).join(", "),
         abv: merged.abv || "",
@@ -199,6 +202,7 @@ export default function Home() {
       const enriched = await enrichRes.json();
       setForm((prev) => ({
         ...prev,
+        name: enriched.name || prev.name,
         category: CATEGORIES.includes(enriched.category) ? enriched.category : prev.category,
         tags: (enriched.tags || []).join(", "),
         abv: enriched.abv || "",
@@ -231,29 +235,36 @@ export default function Home() {
     }
     setSaving(true);
     try {
-      const res = await fetch("/api/drinks", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          name: form.name,
-          category: form.category,
-          tags: form.tags.split(",").map((t) => t.trim()).filter(Boolean),
-          abv: form.abv,
-          region: form.region,
-          producer: form.producer,
-          notes: form.notes,
-          pairing: form.pairing,
-          rating: form.rating,
-          ratingScale: form.ratingScale,
-          ratingSource: form.ratingSource,
-          ratingLink: form.ratingLink,
-          similar: form.similar.split(",").map((s) => s.trim()).filter(Boolean),
-          addedBy: form.addedBy,
-          base64: pendingPhoto?.base64 || null,
-          mediaType: pendingPhoto?.mediaType || null,
-          existingPhotoUrl: !pendingPhoto && form.photoUrl ? form.photoUrl : null,
-        }),
-      });
+      const payload = {
+        name: form.name,
+        category: form.category,
+        tags: form.tags.split(",").map((t) => t.trim()).filter(Boolean),
+        abv: form.abv,
+        region: form.region,
+        producer: form.producer,
+        notes: form.notes,
+        pairing: form.pairing,
+        rating: form.rating,
+        ratingScale: form.ratingScale,
+        ratingSource: form.ratingSource,
+        ratingLink: form.ratingLink,
+        similar: form.similar.split(",").map((s) => s.trim()).filter(Boolean),
+        addedBy: form.addedBy,
+        base64: pendingPhoto?.base64 || null,
+        mediaType: pendingPhoto?.mediaType || null,
+        existingPhotoUrl: !pendingPhoto && form.photoUrl ? form.photoUrl : null,
+      };
+      const res = editingId
+        ? await fetch(`/api/drinks/${editingId}`, {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ edit: true, ...payload }),
+          })
+        : await fetch("/api/drinks", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload),
+          });
       if (!res.ok) {
         const err = await res.json();
         throw new Error(err.error || "save failed");
@@ -285,14 +296,86 @@ export default function Home() {
     }).catch((err) => alert("Couldn't save that reaction: " + err.message));
   }
 
+  function getNoteDraft(itemId) {
+    return noteDrafts[itemId] || { text: "", author: "", tags: [] };
+  }
+
+  function updateNoteDraft(itemId, patch) {
+    setNoteDrafts((prev) => ({
+      ...prev,
+      [itemId]: { ...getNoteDraft(itemId), ...patch },
+    }));
+  }
+
+  function toggleNoteTag(itemId, person) {
+    const draft = getNoteDraft(itemId);
+    const tags = draft.tags.includes(person)
+      ? draft.tags.filter((p) => p !== person)
+      : [...draft.tags, person];
+    updateNoteDraft(itemId, { tags });
+  }
+
+  async function submitNote(itemId) {
+    const draft = getNoteDraft(itemId);
+    if (!draft.text.trim()) return;
+    setPostingNote(itemId);
+    try {
+      const res = await fetch(`/api/drinks/${itemId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          addComment: true,
+          author: draft.author || null,
+          text: draft.text,
+          tags: draft.tags,
+        }),
+      });
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.error || "couldn't post note");
+      }
+      setNoteDrafts((prev) => ({ ...prev, [itemId]: { text: "", author: draft.author, tags: [] } }));
+      await loadItems();
+    } catch (err) {
+      alert("Couldn't post note: " + err.message);
+    } finally {
+      setPostingNote(null);
+    }
+  }
+
   function openAdd() {
+    setEditingId(null);
     setForm(emptyForm());
+    setPendingPhoto(null);
+    setShowAdd(true);
+  }
+
+  function openEdit(item) {
+    setEditingId(item.id);
+    setForm({
+      name: item.name || "",
+      category: CATEGORIES.includes(item.category) ? item.category : CATEGORIES[0],
+      tags: (item.tags || []).join(", "),
+      abv: item.abv || "",
+      region: item.region || "",
+      producer: item.producer || "",
+      notes: item.notes || "",
+      pairing: item.pairing || "",
+      rating: item.rating || "",
+      ratingScale: item.ratingScale || "",
+      ratingSource: item.ratingSource || "",
+      ratingLink: item.ratingLink || "",
+      similar: (item.similar || []).join(", "),
+      addedBy: item.addedBy || "",
+      photoUrl: item.photoURL || "",
+    });
     setPendingPhoto(null);
     setShowAdd(true);
   }
 
   function closeAdd() {
     setShowAdd(false);
+    setEditingId(null);
     setForm(emptyForm());
     setPendingPhoto(null);
     if (cameraInputRef.current) cameraInputRef.current.value = "";
@@ -409,7 +492,7 @@ export default function Home() {
 
       <div className="grid">
         {filtered.map((it) => (
-          <div className="card" key={it.id}>
+          <div className="card" key={it.id} onClick={() => openEdit(it)}>
             <div className="card-photo">
               {it.photoURL ? (
                 <img src={it.photoURL} alt={it.name} />
@@ -422,7 +505,10 @@ export default function Home() {
                   href={it.ratingLink || undefined}
                   target="_blank"
                   rel="noreferrer"
-                  onClick={(e) => !it.ratingLink && e.preventDefault()}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    if (!it.ratingLink) e.preventDefault();
+                  }}
                 >
                   {it.rating}{it.ratingScale?.includes("100") ? "" : "★"}
                 </a>
@@ -455,22 +541,29 @@ export default function Home() {
               {(it.notes || it.pairing || it.similar?.length > 0) && (
                 <button
                   className="expand-toggle"
-                  onClick={() => setExpandedCards((prev) => ({ ...prev, [it.id]: !prev[it.id] }))}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setExpandedCards((prev) => ({ ...prev, [it.id]: !prev[it.id] }));
+                  }}
                 >
                   {expandedCards[it.id] ? "Show less" : "Show more"}
                 </button>
               )}
               <div className="people-ratings">
+                <span className="rate-hint">Tap to rate</span>
                 {PEOPLE.map((p) => {
                   const val = it.ratings?.[p] || "TBD";
                   const icon =
-                    val === "up" ? "👍" : val === "sideways" ? "🤷" : val === "down" ? "👎" : "·";
+                    val === "up" ? "👍" : val === "sideways" ? "🤷" : val === "down" ? "👎" : "☆";
                   return (
                     <button
                       key={p}
                       className={`person-rating ${val !== "TBD" ? "set" : ""}`}
                       title={`${p}: ${val === "TBD" ? "no reaction yet" : val} — tap to change`}
-                      onClick={() => cycleRating(it.id, p, val)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        cycleRating(it.id, p, val);
+                      }}
                     >
                       <span className="pr-icon">{icon}</span>
                       <span className="pr-name">{p}</span>
@@ -478,6 +571,69 @@ export default function Home() {
                   );
                 })}
               </div>
+
+              <div className="comments-block" onClick={(e) => e.stopPropagation()}>
+                {it.comments?.length > 0 && (
+                  <div className="comment-list">
+                    {it.comments.map((c, i) => (
+                      <div className="comment" key={i}>
+                        <p className="comment-text">
+                          {c.author && <span className="comment-author">{c.author}: </span>}
+                          {c.text}
+                        </p>
+                        {c.tags?.length > 0 && (
+                          <div className="comment-tags">
+                            {c.tags.map((t) => (
+                              <span className="comment-tag" key={t}>@{t}</span>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
+                <div className="note-form">
+                  <textarea
+                    className="note-input"
+                    placeholder="Add a note…"
+                    value={getNoteDraft(it.id).text}
+                    onChange={(e) => updateNoteDraft(it.id, { text: e.target.value })}
+                  />
+                  <div className="note-row">
+                    <select
+                      className="note-author-select"
+                      value={getNoteDraft(it.id).author}
+                      onChange={(e) => updateNoteDraft(it.id, { author: e.target.value })}
+                    >
+                      <option value="">Who's this from?</option>
+                      {PEOPLE.map((p) => (
+                        <option value={p} key={p}>{p}</option>
+                      ))}
+                    </select>
+                    <button
+                      className="note-post-btn"
+                      disabled={!getNoteDraft(it.id).text.trim() || postingNote === it.id}
+                      onClick={() => submitNote(it.id)}
+                    >
+                      {postingNote === it.id ? "Posting…" : "Post"}
+                    </button>
+                  </div>
+                  <div className="pill-row note-tag-row">
+                    <span className="chip-label">Tag</span>
+                    {PEOPLE.map((p) => (
+                      <button
+                        key={p}
+                        type="button"
+                        className={`pill small ${getNoteDraft(it.id).tags.includes(p) ? "active" : ""}`}
+                        onClick={() => toggleNoteTag(it.id, p)}
+                      >
+                        {p}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
               {it.addedBy && <p className="added-by">Added by {it.addedBy}</p>}
               {it.createdAt && (
                 <p className="added-date">
@@ -497,7 +653,7 @@ export default function Home() {
         <div className="modal-overlay" onClick={closeAdd}>
           <div className="modal wide" onClick={(e) => e.stopPropagation()} onPaste={handlePaste}>
             <div className="modal-header-row">
-              <h2>Add something</h2>
+              <h2>{editingId ? "Edit" : "Add something"}</h2>
               <button className="close-x" onClick={closeAdd}>✕ Close</button>
             </div>
 
@@ -643,7 +799,7 @@ export default function Home() {
               <div className="modal-actions">
                 <button onClick={closeAdd} className="secondary">Cancel</button>
                 <button onClick={handleSave} disabled={saving}>
-                  {saving ? "Saving…" : "Save"}
+                  {saving ? "Saving…" : editingId ? "Save changes" : "Save"}
                 </button>
               </div>
             </div>
