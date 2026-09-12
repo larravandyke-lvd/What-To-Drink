@@ -388,6 +388,10 @@ export default function Home() {
   async function submitNote(itemId) {
     const draft = getNoteDraft(itemId);
     if (!draft.text.trim()) return;
+    if (!draft.author) {
+      alert("Pick who this note is from before posting.");
+      return;
+    }
     setPostingNote(itemId);
     try {
       const res = await fetch(`/api/drinks/${itemId}`, {
@@ -395,7 +399,7 @@ export default function Home() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           addComment: true,
-          author: draft.author || null,
+          author: draft.author,
           text: draft.text,
           tags: draft.tags,
         }),
@@ -790,7 +794,7 @@ export default function Home() {
                     </select>
                     <button
                       className="note-post-btn"
-                      disabled={!getNoteDraft(it.id).text.trim() || postingNote === it.id}
+                      disabled={!getNoteDraft(it.id).text.trim() || !getNoteDraft(it.id).author || postingNote === it.id}
                       onClick={() => submitNote(it.id)}
                     >
                       {postingNote === it.id ? "Posting…" : "Post"}
