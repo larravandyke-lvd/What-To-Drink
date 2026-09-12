@@ -190,12 +190,11 @@ body::before {
   border-top: 1px solid var(--line);
 }
 .rate-hint {
-  font-size: 10px;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: #7a7568;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--amber);
   width: 100%;
-  margin-bottom: 2px;
+  margin-bottom: 4px;
 }
 .person-rating {
   display: flex;

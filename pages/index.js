@@ -201,10 +201,28 @@ export default function Home() {
     }
   }
 
+  async function attachPhotoOnly(file) {
+    try {
+      const base64 = await fileToBase64(file);
+      const previewUrl = URL.createObjectURL(file);
+      setPendingPhoto({ base64, mediaType: file.type || "image/jpeg", previewUrl });
+    } catch {
+      // couldn't read the file; leave the existing photo as-is
+    }
+  }
+
+  function handleIncomingFile(file) {
+    if (editingId) {
+      attachPhotoOnly(file);
+    } else {
+      processImageFile(file);
+    }
+  }
+
   function handleFileInputChange(e) {
     const file = e.target.files?.[0];
     if (!file) return;
-    processImageFile(file);
+    handleIncomingFile(file);
   }
 
   function handlePaste(e) {
@@ -213,7 +231,7 @@ export default function Home() {
     for (const item of clipItems) {
       if (item.type.startsWith("image/")) {
         const file = item.getAsFile();
-        if (file) processImageFile(file);
+        if (file) handleIncomingFile(file);
         break;
       }
     }
@@ -719,7 +737,7 @@ export default function Home() {
                 </button>
               )}
               <div className="people-ratings">
-                <span className="rate-hint">Tap to rate</span>
+                <span className="rate-hint">👉 Rate this bev</span>
                 {PEOPLE.map((p) => {
                   const val = it.ratings?.[p] || "TBD";
                   const icon =
@@ -847,7 +865,7 @@ export default function Home() {
                       const type = item.types.find((t) => t.startsWith("image/"));
                       if (type) {
                         const blob = await item.getType(type);
-                        processImageFile(blob);
+                        handleIncomingFile(blob);
                         return;
                       }
                     }
@@ -942,11 +960,16 @@ export default function Home() {
               </label>
               <label>
                 Producer website
-                <input
-                  placeholder="e.g. https://peachstreetdistillers.com"
-                  value={form.producerUrl}
-                  onChange={(e) => setForm({ ...form, producerUrl: e.target.value })}
-                />
+                <div className="field-with-link">
+                  <input
+                    placeholder="e.g. https://peachstreetdistillers.com"
+                    value={form.producerUrl}
+                    onChange={(e) => setForm({ ...form, producerUrl: e.target.value })}
+                  />
+                  {form.producerUrl && (
+                    <a href={form.producerUrl} target="_blank" rel="noreferrer" className="field-link">Open ↗</a>
+                  )}
+                </div>
               </label>
               <label>
                 What it's about
@@ -966,11 +989,16 @@ export default function Home() {
               </label>
               <label>
                 Rating source
-                <input
-                  placeholder="e.g. Vivino, Untappd, Distiller"
-                  value={form.ratingSource}
-                  onChange={(e) => setForm({ ...form, ratingSource: e.target.value })}
-                />
+                <div className="field-with-link">
+                  <input
+                    placeholder="e.g. Vivino, Untappd, Distiller"
+                    value={form.ratingSource}
+                    onChange={(e) => setForm({ ...form, ratingSource: e.target.value })}
+                  />
+                  {form.ratingLink && (
+                    <a href={form.ratingLink} target="_blank" rel="noreferrer" className="field-link">Open ↗</a>
+                  )}
+                </div>
               </label>
               <label>
                 If you like this, try (comma separated)
