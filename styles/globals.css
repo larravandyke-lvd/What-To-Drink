@@ -411,21 +411,22 @@ body::before {
   justify-content: center;
   gap: 10px;
   text-align: center;
-  color: var(--amber);
-  padding: 10px 0;
+  color: #faf7f1;
+  padding: 12px 0;
   font-weight: 700;
   animation: analyzing-pulse 1.2s ease-in-out infinite;
   position: sticky;
   top: 0;
   z-index: 5;
-  background: var(--panel);
+  background: var(--amber);
   border-radius: 8px;
+  box-shadow: 0 4px 14px rgba(0,0,0,0.25);
 }
 .spinner {
   width: 18px;
   height: 18px;
-  border: 3px solid rgba(128,53,57,0.25);
-  border-top-color: var(--amber);
+  border: 3px solid rgba(250,247,241,0.35);
+  border-top-color: #faf7f1;
   border-radius: 50%;
   animation: spin 0.7s linear infinite;
   display: inline-block;
