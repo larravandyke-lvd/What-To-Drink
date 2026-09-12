@@ -122,12 +122,14 @@ body::before {
 .tags-toggle-btn {
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 6px;
-  background: rgba(128,53,57,0.1);
+  width: 100%;
+  background: var(--panel);
   border: 1px solid var(--amber);
   color: var(--amber);
-  padding: 8px 16px;
-  border-radius: 999px;
+  padding: 10px 16px;
+  border-radius: 12px;
   font-size: 13px;
   font-weight: 700;
   cursor: pointer;
@@ -135,7 +137,7 @@ body::before {
   font-family: inherit;
   margin-bottom: 12px;
 }
-.tags-toggle-btn:hover { background: rgba(128,53,57,0.18); }
+.tags-toggle-btn:hover { background: rgba(128,53,57,0.08); }
 .filters-panel {
   background: var(--panel);
   border: 1px solid var(--line);
@@ -249,7 +251,7 @@ body::before {
   text-decoration: none;
 }
 .card-body { padding: 14px; }
-.card-body h3 { margin: 0 0 6px; font-size: 20px; font-family: var(--font-headline); font-weight: 400; overflow-wrap: break-word; word-break: break-word; }
+.card-body h3 { margin: 0 0 6px; font-size: 20px; font-family: var(--font-headline); font-weight: 400; }
 .card-meta { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
 .badge { background: rgba(217,146,47,0.15); color: var(--amber); padding: 2px 10px; border-radius: 999px; font-size: 12px; }
 .abv { color: #726d62; font-size: 12px; }
