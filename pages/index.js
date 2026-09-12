@@ -552,6 +552,7 @@ export default function Home() {
           onChange={(e) => setSearch(e.target.value)}
         />
         <button className="filters-toggle-btn" onClick={() => setShowFilters((v) => !v)}>
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 5h16M7 12h10M10 19h4"/></svg>
           Filters {showFilters ? "▴" : "▾"}
         </button>
         {filtersActive && (
@@ -559,6 +560,36 @@ export default function Home() {
             Clear all filters
           </button>
         )}
+      </div>
+
+      <div className="chip-row">
+        <span className="chip-label">Sort</span>
+        {[
+          { value: "recent", label: "Most recent" },
+          { value: "alpha", label: "A–Z" },
+          { value: "addedBy", label: "Added by" },
+        ].map((opt) => (
+          <button
+            key={opt.value}
+            className={`chip ${sortBy === opt.value ? "active" : ""}`}
+            onClick={() => setSortBy(opt.value)}
+          >
+            {opt.label}
+          </button>
+        ))}
+      </div>
+
+      <div className="chip-row">
+        <span className="chip-label">Who</span>
+        {["All", ...PEOPLE].map((p) => (
+          <button
+            key={p}
+            className={`chip ${activePerson === p ? "active" : ""}`}
+            onClick={() => setActivePerson(p)}
+          >
+            {p}
+          </button>
+        ))}
       </div>
 
       <div className="tabs">
@@ -576,81 +607,49 @@ export default function Home() {
         ))}
       </div>
 
-      {showFilters && (
+      <div className="chip-row reaction-filter">
+        <span className="chip-label">Show what</span>
+        {PEOPLE.map((p) => (
+          <button
+            key={p}
+            className={`chip ${ratingFilterPeople.includes(p) ? "active" : ""}`}
+            onClick={() => togglePersonFilter(p)}
+          >
+            {p}
+          </button>
+        ))}
+        {ratingFilterPeople.length > 0 && (
+          <>
+            {REACTIONS.map((r) => (
+              <button
+                key={r.value}
+                className={`chip reaction-chip ${ratingFilterValue === r.value ? "active" : ""}`}
+                onClick={() => setRatingFilterValue(r.value)}
+              >
+                {r.icon}
+              </button>
+            ))}
+            <button className="chip clear-chip" onClick={() => setRatingFilterPeople([])}>
+              Clear
+            </button>
+          </>
+        )}
+      </div>
+
+      {showFilters && tagOptions.length > 0 && (
         <div className="filters-panel">
           <div className="chip-row">
-            <span className="chip-label">Sort</span>
-            {[
-              { value: "recent", label: "Most recent" },
-              { value: "alpha", label: "A–Z" },
-              { value: "addedBy", label: "Added by" },
-            ].map((opt) => (
+            <span className="chip-label">Tags</span>
+            {tagOptions.map((t) => (
               <button
-                key={opt.value}
-                className={`chip ${sortBy === opt.value ? "active" : ""}`}
-                onClick={() => setSortBy(opt.value)}
+                key={t}
+                className={`chip ${activeTag === t ? "active" : ""}`}
+                onClick={() => setActiveTag(activeTag === t ? null : t)}
               >
-                {opt.label}
+                {t}
               </button>
             ))}
           </div>
-
-          <div className="chip-row">
-            <span className="chip-label">Who</span>
-            {["All", ...PEOPLE].map((p) => (
-              <button
-                key={p}
-                className={`chip ${activePerson === p ? "active" : ""}`}
-                onClick={() => setActivePerson(p)}
-              >
-                {p}
-              </button>
-            ))}
-          </div>
-
-          <div className="chip-row reaction-filter">
-            <span className="chip-label">Show what</span>
-            {PEOPLE.map((p) => (
-              <button
-                key={p}
-                className={`chip ${ratingFilterPeople.includes(p) ? "active" : ""}`}
-                onClick={() => togglePersonFilter(p)}
-              >
-                {p}
-              </button>
-            ))}
-            {ratingFilterPeople.length > 0 && (
-              <>
-                {REACTIONS.map((r) => (
-                  <button
-                    key={r.value}
-                    className={`chip reaction-chip ${ratingFilterValue === r.value ? "active" : ""}`}
-                    onClick={() => setRatingFilterValue(r.value)}
-                  >
-                    {r.icon}
-                  </button>
-                ))}
-                <button className="chip clear-chip" onClick={() => setRatingFilterPeople([])}>
-                  Clear
-                </button>
-              </>
-            )}
-          </div>
-
-          {tagOptions.length > 0 && (
-            <div className="chip-row">
-              <span className="chip-label">Tags</span>
-              {tagOptions.map((t) => (
-                <button
-                  key={t}
-                  className={`chip ${activeTag === t ? "active" : ""}`}
-                  onClick={() => setActiveTag(activeTag === t ? null : t)}
-                >
-                  {t}
-                </button>
-              ))}
-            </div>
-          )}
         </div>
       )}
 
