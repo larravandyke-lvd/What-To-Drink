@@ -1,11 +1,11 @@
 :root {
-  --bg: #1c1c1c;
-  --panel: #262626;
-  --line: #3d3d3d;
-  --cream: #ece6dc;
-  --amber: #c1703a;
-  --amber-dim: #a45a2b;
-  --rust: #6b8f71;
+  --bg: #1c1410;
+  --panel: #f3ead2;
+  --line: #c7a869;
+  --cream: #3b2f22;
+  --amber: #8b3a3a;
+  --amber-dim: #6e2c2c;
+  --rust: #5c6e4a;
   --font-headline: "Rye", Georgia, serif;
 }
 
@@ -15,21 +15,27 @@ body {
   margin: 0;
   background-color: var(--bg);
   background-image:
-    radial-gradient(circle 3px at 15% 25%, rgba(236,230,220,0.06), transparent),
-    radial-gradient(circle 2px at 35% 65%, rgba(236,230,220,0.05), transparent),
-    radial-gradient(circle 4px at 55% 15%, rgba(236,230,220,0.04), transparent),
-    radial-gradient(circle 2px at 75% 45%, rgba(236,230,220,0.06), transparent),
-    radial-gradient(circle 3px at 90% 75%, rgba(236,230,220,0.05), transparent),
-    radial-gradient(circle 2px at 25% 85%, rgba(236,230,220,0.04), transparent),
-    radial-gradient(circle 3px at 65% 90%, rgba(236,230,220,0.05), transparent),
-    radial-gradient(circle 2px at 5% 55%, rgba(236,230,220,0.04), transparent);
+    radial-gradient(circle 3px at 15% 25%, rgba(200,170,120,0.06), transparent),
+    radial-gradient(circle 2px at 35% 65%, rgba(200,170,120,0.05), transparent),
+    radial-gradient(circle 4px at 55% 15%, rgba(200,170,120,0.04), transparent),
+    radial-gradient(circle 2px at 75% 45%, rgba(200,170,120,0.06), transparent),
+    radial-gradient(circle 3px at 90% 75%, rgba(200,170,120,0.05), transparent),
+    radial-gradient(circle 2px at 25% 85%, rgba(200,170,120,0.04), transparent),
+    radial-gradient(circle 3px at 65% 90%, rgba(200,170,120,0.05), transparent),
+    radial-gradient(circle 2px at 5% 55%, rgba(200,170,120,0.04), transparent);
   background-size: 420px 420px;
   background-repeat: repeat;
   color: var(--cream);
   font-family: Georgia, "Times New Roman", serif;
 }
 
-.page { max-width: 1100px; margin: 0 auto; padding: 24px 20px 60px; }
+.page {
+  max-width: 1100px; margin: 24px auto; padding: 24px 20px 60px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  box-shadow: 0 12px 48px rgba(0,0,0,0.55);
+}
 
 .portal-link {
   display: inline-block;
@@ -44,7 +50,7 @@ body {
   margin: 0;
   font-size: 12px;
   letter-spacing: 0.15em;
-  color: #a08d7a;
+  color: #6b5940;
   text-transform: uppercase;
 }
 
@@ -62,11 +68,11 @@ body {
 .brand { display: flex; align-items: center; gap: 14px; }
 .brand-icon { width: 48px; height: 48px; border-radius: 12px; }
 .brand h1 { margin: 0; font-size: 34px; letter-spacing: 0.01em; font-family: var(--font-headline); font-weight: 400; }
-.tagline { margin: 0; color: #c9b9a8; font-size: 14px; }
+.tagline { margin: 0; color: #5a4838; font-size: 14px; }
 
 .add-btn {
   background: var(--amber);
-  color: #241521;
+  color: #f3ead2;
   border: none;
   padding: 12px 20px;
   border-radius: 999px;
@@ -87,11 +93,11 @@ body {
   font-family: inherit;
   font-size: 14px;
 }
-.search-input::placeholder { color: #7a6a5a; }
+.search-input::placeholder { color: #9c8a6e; }
 .search-input:focus { outline: none; border-color: var(--amber); }
 
 .chip-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 14px; }
-.chip-label { font-size: 12px; letter-spacing: 0.08em; color: #a08d7a; margin-right: 4px; text-transform: uppercase; }
+.chip-label { font-size: 12px; letter-spacing: 0.08em; color: #6b5940; margin-right: 4px; text-transform: uppercase; }
 .chip {
   background: transparent;
   border: 1px solid var(--line);
@@ -101,10 +107,10 @@ body {
   cursor: pointer;
   font-size: 13px;
 }
-.chip.active { background: var(--amber); color: #241521; border-color: var(--amber); }
+.chip.active { background: var(--amber); color: #f3ead2; border-color: var(--amber); }
 
 .reaction-chip { font-size: 15px; padding: 4px 10px; }
-.clear-chip { color: #a08d7a; border-style: dashed; }
+.clear-chip { color: #6b5940; border-style: dashed; }
 
 .people-ratings {
   display: flex;
@@ -118,7 +124,7 @@ body {
   font-size: 10px;
   letter-spacing: 0.06em;
   text-transform: uppercase;
-  color: #6a5a4a;
+  color: #7a6248;
   width: 100%;
   margin-bottom: 2px;
 }
@@ -127,8 +133,8 @@ body {
   align-items: center;
   gap: 4px;
   background: rgba(255,255,255,0.04);
-  border: 1px dashed #5a4a3a;
-  color: #a08d7a;
+  border: 1px dashed #b8a578;
+  color: #6b5940;
   border-radius: 999px;
   padding: 3px 9px;
   font-size: 11px;
@@ -141,7 +147,7 @@ body {
 .tab {
   background: none;
   border: none;
-  color: #c9b9a8;
+  color: #5a4838;
   padding: 10px 14px;
   cursor: pointer;
   font-size: 14px;
@@ -169,7 +175,7 @@ body {
 .card-photo img { width: 100%; height: 160px; object-fit: cover; display: block; }
 .rating-badge {
   position: absolute; top: 10px; right: 10px;
-  background: var(--rust); color: var(--cream);
+  background: var(--rust); color: #f3ead2;
   font-size: 12px; font-weight: 700;
   padding: 4px 9px; border-radius: 999px;
   text-decoration: none;
@@ -178,10 +184,10 @@ body {
 .card-body h3 { margin: 0 0 6px; font-size: 20px; font-family: var(--font-headline); font-weight: 400; }
 .card-meta { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
 .badge { background: rgba(217,146,47,0.15); color: var(--amber); padding: 2px 10px; border-radius: 999px; font-size: 12px; }
-.abv { color: #a08d7a; font-size: 12px; }
+.abv { color: #6b5940; font-size: 12px; }
 .tag-list { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; }
-.tag { background: rgba(255,255,255,0.06); padding: 2px 8px; border-radius: 6px; font-size: 11px; color: #c9b9a8; }
-.notes { font-size: 13px; color: #d8c9b8; margin: 0 0 6px; line-height: 1.4; }
+.tag { background: rgba(255,255,255,0.06); padding: 2px 8px; border-radius: 6px; font-size: 11px; color: #5a4838; }
+.notes { font-size: 13px; color: #4a3d2c; margin: 0 0 6px; line-height: 1.4; }
 .comments-block {
   margin: 10px 0;
   padding-top: 10px;
@@ -190,7 +196,7 @@ body {
 }
 .comment-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 10px; }
 .comment { background: rgba(255,255,255,0.03); border-radius: 8px; padding: 8px 10px; }
-.comment-text { margin: 0; font-size: 13px; color: #d8c9b8; line-height: 1.4; }
+.comment-text { margin: 0; font-size: 13px; color: #4a3d2c; line-height: 1.4; }
 .comment-author { color: var(--amber); font-weight: 700; }
 .comment-tags { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 4px; }
 .comment-tag { font-size: 11px; color: var(--amber-dim); }
@@ -220,7 +226,7 @@ body {
 }
 .note-post-btn {
   background: var(--amber);
-  color: #241521;
+  color: #f3ead2;
   border: none;
   border-radius: 8px;
   padding: 6px 16px;
@@ -231,7 +237,7 @@ body {
 .note-post-btn:disabled { opacity: 0.5; cursor: default; }
 .note-tag-row { margin-top: 2px; }
 .pill.small { padding: 3px 9px; font-size: 11px; }
-.added-date { font-size: 10px; color: #6a5a4a; margin: 2px 0 0; }
+.added-date { font-size: 10px; color: #7a6248; margin: 2px 0 0; }
 
 .photo-fallback {
   width: 100%; height: 160px; display: flex; align-items: center; justify-content: center;
@@ -252,7 +258,7 @@ body {
   font-size: 12px; padding: 4px 0 8px; cursor: pointer; font-family: inherit;
 }
 
-.empty { color: #8a7a6a; grid-column: 1 / -1; text-align: center; padding: 40px 0; }
+.empty { color: #7a6248; grid-column: 1 / -1; text-align: center; padding: 40px 0; }
 
 .modal.wide { max-width: 640px; }
 .modal-header-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
@@ -279,7 +285,7 @@ body {
 .name-row { display: flex; gap: 8px; }
 .name-row input { flex: 1; }
 .lookup-btn {
-  background: var(--amber); color: #241521; border: none; border-radius: 8px;
+  background: var(--amber); color: #f3ead2; border: none; border-radius: 8px;
   padding: 0 16px; font-weight: 700; cursor: pointer; white-space: nowrap;
 }
 .lookup-btn:disabled { opacity: 0.5; cursor: default; }
@@ -289,7 +295,7 @@ body {
   background: transparent; border: 1px solid var(--line); color: var(--cream);
   padding: 6px 12px; border-radius: 999px; font-size: 13px; cursor: pointer; font-family: inherit;
 }
-.pill.active { background: var(--amber); color: #241521; border-color: var(--amber); }
+.pill.active { background: var(--amber); color: #f3ead2; border-color: var(--amber); }
 .required-hint { font-size: 11px; color: var(--rust); margin-top: 2px; }
 
 .mode-choice { display: flex; flex-direction: column; gap: 12px; }
@@ -308,7 +314,7 @@ body {
 .mode-btn:hover { border-color: var(--amber); }
 
 .type-entry { display: flex; flex-direction: column; gap: 12px; }
-.type-entry label { display: flex; flex-direction: column; gap: 4px; font-size: 13px; color: #c9b9a8; }
+.type-entry label { display: flex; flex-direction: column; gap: 4px; font-size: 13px; color: #5a4838; }
 .type-entry input {
   background: var(--bg); border: 1px solid var(--line); color: var(--cream);
   padding: 10px 12px; border-radius: 8px; font-family: inherit; font-size: 14px;
@@ -326,7 +332,7 @@ body {
 .analyzing { text-align: center; color: var(--amber); padding: 20px 0; }
 
 .form { display: flex; flex-direction: column; gap: 12px; }
-.form label { display: flex; flex-direction: column; gap: 4px; font-size: 13px; color: #c9b9a8; }
+.form label { display: flex; flex-direction: column; gap: 4px; font-size: 13px; color: #5a4838; }
 .form input, .form select, .form textarea {
   background: var(--bg); border: 1px solid var(--line); color: var(--cream);
   padding: 8px 10px; border-radius: 8px; font-family: inherit; font-size: 14px;
@@ -337,7 +343,7 @@ body {
 .modal-actions button {
   padding: 10px 18px; border-radius: 999px; border: none; cursor: pointer; font-weight: 600;
 }
-.modal-actions button:not(.secondary) { background: var(--amber); color: #241521; }
+.modal-actions button:not(.secondary) { background: var(--amber); color: #f3ead2; }
 .modal-actions .secondary { background: transparent; color: var(--cream); border: 1px solid var(--line); }
 
 .scroll-top-btn {
@@ -348,7 +354,7 @@ body {
   height: 48px;
   border-radius: 50%;
   background: var(--amber);
-  color: #10151f;
+  color: #f3ead2;
   border: none;
   font-size: 20px;
   font-weight: 700;

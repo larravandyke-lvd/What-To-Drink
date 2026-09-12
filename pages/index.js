@@ -16,6 +16,7 @@ function emptyForm() {
     abv: "",
     region: "",
     producer: "",
+    producerUrl: "",
     notes: "",
     pairing: "",
     rating: "",
@@ -45,6 +46,7 @@ export default function Home() {
   const [activePerson, setActivePerson] = useState("All");
   const [activeTag, setActiveTag] = useState(null);
   const [search, setSearch] = useState("");
+  const [sortBy, setSortBy] = useState("recent");
   const [showAdd, setShowAdd] = useState(false);
   const [analyzing, setAnalyzing] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -113,6 +115,17 @@ export default function Home() {
     });
   }, [items, activeCategory, ratingFilterPeople, ratingFilterValue, activePerson, activeTag, search]);
 
+  const sorted = useMemo(() => {
+    const arr = [...filtered];
+    if (sortBy === "alpha") {
+      arr.sort((a, b) => (a.name || "").localeCompare(b.name || ""));
+    } else if (sortBy === "addedBy") {
+      arr.sort((a, b) => (a.addedBy || "").localeCompare(b.addedBy || "") || (a.name || "").localeCompare(b.name || ""));
+    }
+    // "recent" needs no re-sort — items already arrive newest-first from the API
+    return arr;
+  }, [filtered, sortBy]);
+
   const tagOptions = useMemo(() => {
     const pool = activeCategory === "All" ? items : items.filter((i) => i.category === activeCategory);
     const set = new Set();
@@ -157,6 +170,7 @@ export default function Home() {
         abv: merged.abv || "",
         region: merged.region || "",
         producer: merged.producer || "",
+        producerUrl: merged.producerUrl || "",
         notes: merged.notes || "",
         pairing: merged.pairing || "",
         rating: merged.rating || "",
@@ -208,6 +222,7 @@ export default function Home() {
         abv: enriched.abv || "",
         region: enriched.region || "",
         producer: enriched.producer || "",
+        producerUrl: enriched.producerUrl || "",
         notes: enriched.notes || "",
         pairing: enriched.pairing || "",
         rating: enriched.rating || "",
@@ -242,6 +257,7 @@ export default function Home() {
         abv: form.abv,
         region: form.region,
         producer: form.producer,
+        producerUrl: form.producerUrl,
         notes: form.notes,
         pairing: form.pairing,
         rating: form.rating,
@@ -315,6 +331,21 @@ export default function Home() {
     updateNoteDraft(itemId, { tags });
   }
 
+  const filtersActive =
+    activeCategory !== "All" ||
+    ratingFilterPeople.length > 0 ||
+    activePerson !== "All" ||
+    activeTag !== null ||
+    search.trim() !== "";
+
+  function clearAllFilters() {
+    setActiveCategory("All");
+    setRatingFilterPeople([]);
+    setActivePerson("All");
+    setActiveTag(null);
+    setSearch("");
+  }
+
   async function submitNote(itemId) {
     const draft = getNoteDraft(itemId);
     if (!draft.text.trim()) return;
@@ -359,6 +390,7 @@ export default function Home() {
       abv: item.abv || "",
       region: item.region || "",
       producer: item.producer || "",
+      producerUrl: item.producerUrl || "",
       notes: item.notes || "",
       pairing: item.pairing || "",
       rating: item.rating || "",
@@ -391,7 +423,8 @@ export default function Home() {
   return (
     <div className="page">
       <a href="https://portals-gateway.vercel.app/" className="portal-link">
-        ← Portal Menu
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+        Portal Menu
       </a>
 
       <header className="header">
@@ -401,9 +434,14 @@ export default function Home() {
           <h1>What To Drink</h1>
         </div>
         <p className="tagline">Snap a bottle, glass, or menu — we'll fill in the rest.</p>
-        <button className="add-btn" onClick={openAdd}>
-          + Add something
-        </button>
+        <div className="header-actions">
+          <button className="add-btn" onClick={openAdd}>
+            + Add something
+          </button>
+          <button className="refresh-btn" onClick={loadItems} title="Refresh">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12a9 9 0 1 1-3-6.7M21 3v6h-6"/></svg>
+          </button>
+        </div>
         <input ref={cameraInputRef} type="file" accept="image/*" capture="environment" hidden onChange={handleFileInputChange} />
         <input ref={libraryInputRef} type="file" accept="image/*" hidden onChange={handleFileInputChange} />
       </header>
@@ -416,6 +454,28 @@ export default function Home() {
           value={search}
           onChange={(e) => setSearch(e.target.value)}
         />
+        {filtersActive && (
+          <button className="clear-filters-btn" onClick={clearAllFilters}>
+            Clear all filters
+          </button>
+        )}
+      </div>
+
+      <div className="chip-row">
+        <span className="chip-label">Sort</span>
+        {[
+          { value: "recent", label: "Most recent" },
+          { value: "alpha", label: "A–Z" },
+          { value: "addedBy", label: "Added by" },
+        ].map((opt) => (
+          <button
+            key={opt.value}
+            className={`chip ${sortBy === opt.value ? "active" : ""}`}
+            onClick={() => setSortBy(opt.value)}
+          >
+            {opt.label}
+          </button>
+        ))}
       </div>
 
       <div className="chip-row">
@@ -491,7 +551,7 @@ export default function Home() {
       )}
 
       <div className="grid">
-        {filtered.map((it) => (
+        {sorted.map((it) => (
           <div className="card" key={it.id} onClick={() => openEdit(it)}>
             <div className="card-photo">
               {it.photoURL ? (
@@ -530,7 +590,25 @@ export default function Home() {
               {it.ratingSource && (
                 <p className="added-by">{it.rating} on {it.ratingSource}</p>
               )}
-              {it.producer && <p className="notes"><em>{it.producer}</em>{it.region ? ` · ${it.region}` : ""}</p>}
+              {it.producer && (
+                <p className="notes">
+                  <em>
+                    {it.producerUrl ? (
+                      <a
+                        href={it.producerUrl}
+                        target="_blank"
+                        rel="noreferrer"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        {it.producer}
+                      </a>
+                    ) : (
+                      it.producer
+                    )}
+                  </em>
+                  {it.region ? ` · ${it.region}` : ""}
+                </p>
+              )}
               <div className={expandedCards[it.id] ? "" : "clamp-block"}>
                 {it.notes && <p className="notes">{it.notes}</p>}
                 {it.pairing && <p className="notes">Pairs with: {it.pairing}</p>}
@@ -634,7 +712,6 @@ export default function Home() {
                 </div>
               </div>
 
-              {it.addedBy && <p className="added-by">Added by {it.addedBy}</p>}
               {it.createdAt && (
                 <p className="added-date">
                   {new Date(it.createdAt).toLocaleString(undefined, {
@@ -646,7 +723,7 @@ export default function Home() {
             </div>
           </div>
         ))}
-        {filtered.length === 0 && <p className="empty">Nothing here yet.</p>}
+        {sorted.length === 0 && <p className="empty">Nothing here yet.</p>}
       </div>
 
       {showAdd && (
@@ -766,6 +843,14 @@ export default function Home() {
               <label>
                 Producer
                 <input value={form.producer} onChange={(e) => setForm({ ...form, producer: e.target.value })} />
+              </label>
+              <label>
+                Producer website
+                <input
+                  placeholder="e.g. https://peachstreetdistillers.com"
+                  value={form.producerUrl}
+                  onChange={(e) => setForm({ ...form, producerUrl: e.target.value })}
+                />
               </label>
               <label>
                 What it's about
