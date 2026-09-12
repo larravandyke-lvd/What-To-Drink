@@ -562,34 +562,36 @@ export default function Home() {
         )}
       </div>
 
-      <div className="chip-row">
-        <span className="chip-label">Sort</span>
-        {[
-          { value: "recent", label: "Most recent" },
-          { value: "alpha", label: "A–Z" },
-          { value: "addedBy", label: "Added by" },
-        ].map((opt) => (
-          <button
-            key={opt.value}
-            className={`chip ${sortBy === opt.value ? "active" : ""}`}
-            onClick={() => setSortBy(opt.value)}
-          >
-            {opt.label}
-          </button>
-        ))}
-      </div>
+      <div className="filters-panel">
+        <div className="chip-row">
+          <span className="chip-label">Sort</span>
+          {[
+            { value: "recent", label: "Most recent" },
+            { value: "alpha", label: "A–Z" },
+            { value: "addedBy", label: "Added by" },
+          ].map((opt) => (
+            <button
+              key={opt.value}
+              className={`chip ${sortBy === opt.value ? "active" : ""}`}
+              onClick={() => setSortBy(opt.value)}
+            >
+              {opt.label}
+            </button>
+          ))}
+        </div>
 
-      <div className="chip-row">
-        <span className="chip-label">Who</span>
-        {["All", ...PEOPLE].map((p) => (
-          <button
-            key={p}
-            className={`chip ${activePerson === p ? "active" : ""}`}
-            onClick={() => setActivePerson(p)}
-          >
-            {p}
-          </button>
-        ))}
+        <div className="chip-row">
+          <span className="chip-label">Who</span>
+          {["All", ...PEOPLE].map((p) => (
+            <button
+              key={p}
+              className={`chip ${activePerson === p ? "active" : ""}`}
+              onClick={() => setActivePerson(p)}
+            >
+              {p}
+            </button>
+          ))}
+        </div>
       </div>
 
       <div className="tabs">
