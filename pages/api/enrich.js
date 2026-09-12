@@ -59,15 +59,28 @@ Use current, accurate information. If you can't confidently identify the drink, 
       }
       debugImages.push({ source: "AI-suggested", url: json.imageUrl, result: hosted });
       if (hosted.url) json.photoUrl = hosted.url;
-      delete json.imageUrl;
     }
+    delete json.imageUrl;
 
     // Fallback: Wikipedia's summary API is far more reliably fetchable than
     // random retailer/producer sites, and covers most well-known drink brands.
+    // The exact product name rarely matches Wikipedia's article title verbatim
+    // (e.g. "Tecate Original" vs the actual article "Tecate (beer)"), so search
+    // for the closest title first rather than guessing.
     if (!json.photoUrl) {
       try {
+        let wikiTitle = lookupName;
+        const searchRes = await fetch(
+          `https://en.wikipedia.org/w/api.php?action=opensearch&search=${encodeURIComponent(lookupName)}&limit=1&namespace=0&format=json&origin=*`,
+          { headers: { "User-Agent": "what-to-drink-app/1.0" } }
+        );
+        if (searchRes.ok) {
+          const searchJson = await searchRes.json();
+          if (searchJson[1]?.[0]) wikiTitle = searchJson[1][0];
+        }
+
         const wikiRes = await fetch(
-          `https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(lookupName)}`,
+          `https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(wikiTitle)}`,
           { headers: { "User-Agent": "what-to-drink-app/1.0" } }
         );
         if (wikiRes.ok) {
@@ -79,13 +92,13 @@ Use current, accurate information. If you can't confidently identify the drink, 
               const original = toWikimediaOriginal(thumb);
               if (original) hosted = await tryHostImage(original);
             }
-            debugImages.push({ source: "Wikipedia", url: thumb, result: hosted });
+            debugImages.push({ source: "Wikipedia", title: wikiTitle, url: thumb, result: hosted });
             if (hosted.url) json.photoUrl = hosted.url;
           } else {
-            debugImages.push({ source: "Wikipedia", error: "page found but no thumbnail" });
+            debugImages.push({ source: "Wikipedia", title: wikiTitle, error: "page found but no thumbnail" });
           }
         } else {
-          debugImages.push({ source: "Wikipedia", error: `page fetch failed: ${wikiRes.status}` });
+          debugImages.push({ source: "Wikipedia", title: wikiTitle, error: `page fetch failed: ${wikiRes.status}` });
         }
       } catch (e) {
         debugImages.push({ source: "Wikipedia", error: `exception: ${e.message}` });
