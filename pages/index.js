@@ -8,24 +8,6 @@ const REACTIONS = [
 ];
 const PEOPLE = ["Eric", "Elthon", "Larra", "Dan V", "Jason", "Dallas"];
 
-function getLastAddedBy() {
-  if (typeof window === "undefined") return "";
-  try {
-    return localStorage.getItem("wtd_last_added_by") || "";
-  } catch {
-    return "";
-  }
-}
-
-function rememberAddedBy(person) {
-  if (typeof window === "undefined" || !person) return;
-  try {
-    localStorage.setItem("wtd_last_added_by", person);
-  } catch {
-    // ignore storage errors
-  }
-}
-
 function emptyForm() {
   return {
     name: "",
@@ -42,7 +24,7 @@ function emptyForm() {
     ratingSource: "",
     ratingLink: "",
     similar: "",
-    addedBy: getLastAddedBy(),
+    addedBy: "",
     photoUrl: "",
   };
 }
@@ -323,7 +305,6 @@ export default function Home() {
         const err = await res.json();
         throw new Error(err.error || "save failed");
       }
-      rememberAddedBy(form.addedBy);
       await loadItems();
       closeAdd();
     } catch (err) {
@@ -458,7 +439,6 @@ export default function Home() {
           body: JSON.stringify(payload),
         });
       }
-      rememberAddedBy(finalForm.addedBy);
       await loadItems();
     } catch {
       // best-effort background save — user isn't watching, fail silently
@@ -519,10 +499,15 @@ export default function Home() {
 
   return (
     <div className="page">
-      <a href="https://portals-gateway.vercel.app/" className="portal-link">
-        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
-        Portal Menu
-      </a>
+      <div className="top-bar">
+        <a href="https://portals-gateway.vercel.app/" className="portal-link" target="_blank" rel="noreferrer">
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+          Portal Menu
+        </a>
+        <button className="refresh-btn" onClick={loadItems} title="Refresh">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12a9 9 0 1 1-3-6.7M21 3v6h-6"/></svg>
+        </button>
+      </div>
 
       <header className="header">
         <p className="eyebrow">CVD</p>
@@ -534,9 +519,6 @@ export default function Home() {
         <div className="header-actions">
           <button className="add-btn" onClick={openAdd}>
             + Add something
-          </button>
-          <button className="refresh-btn" onClick={loadItems} title="Refresh">
-            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12a9 9 0 1 1-3-6.7M21 3v6h-6"/></svg>
           </button>
         </div>
         <input ref={cameraInputRef} type="file" accept="image/*" capture="environment" hidden onChange={handleFileInputChange} />
@@ -683,7 +665,7 @@ export default function Home() {
               )}
             </div>
             <div className="card-body">
-              <h3>{it.name}</h3>
+              <h3>{it.name.replace(/\//g, "/\u200B")}</h3>
               <div className="card-meta">
                 <span className="badge">{it.category}</span>
                 {it.abv && <span className="abv">{it.abv}</span>}
