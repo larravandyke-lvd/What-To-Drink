@@ -263,6 +263,8 @@ body::before {
 .tag-list { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; }
 .tag { background: rgba(255,255,255,0.06); padding: 2px 8px; border-radius: 6px; font-size: 11px; color: #5c584d; }
 .notes { font-size: 13px; color: #453f37; margin: 0 0 6px; line-height: 1.4; }
+.producer-link { color: var(--amber); text-decoration: underline; }
+.producer-link:hover { color: var(--amber-dim); }
 .comments-block {
   margin: 10px 0;
   padding-top: 10px;
@@ -461,8 +463,15 @@ body::before {
 .modal-actions button {
   padding: 10px 18px; border-radius: 999px; border: none; cursor: pointer; font-weight: 600;
 }
-.modal-actions button:not(.secondary) { background: var(--amber); color: #faf7f1; }
+.modal-actions button:not(.secondary):not(.danger) { background: var(--amber); color: #faf7f1; }
 .modal-actions .secondary { background: transparent; color: var(--cream); border: 1px solid var(--line); }
+.modal-actions .danger {
+  background: transparent;
+  color: #8a3b3b;
+  border: 1px solid #c9a8a8;
+  margin-right: auto;
+}
+.modal-actions .danger:hover { background: rgba(138,59,59,0.08); }
 
 .scroll-top-btn {
   position: fixed;
