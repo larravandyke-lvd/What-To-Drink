@@ -278,6 +278,15 @@ export default function Home() {
     }
   }
 
+  function findPossibleDuplicate(name) {
+    const target = name.trim().toLowerCase();
+    if (!target) return null;
+    return items.find((it) => {
+      const existing = (it.name || "").trim().toLowerCase();
+      return existing === target || existing.includes(target) || target.includes(existing);
+    });
+  }
+
   async function handleSave() {
     if (analyzing) return;
     if (!form.name.trim()) {
@@ -288,6 +297,12 @@ export default function Home() {
       alert("Pick who's adding this before saving.");
       addedByRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
       return;
+    }
+    if (!editingId) {
+      const dup = findPossibleDuplicate(form.name);
+      if (dup && !confirm(`"${dup.name}" is already on the list — save this as a new entry anyway?`)) {
+        return;
+      }
     }
     setSaving(true);
     try {
@@ -426,6 +441,14 @@ export default function Home() {
       setEditingId(null);
       return;
     }
+    if (!eid && findPossibleDuplicate(finalForm.name)) {
+      // A similar item already exists and nobody's watching to confirm — don't
+      // silently create a duplicate. Just drop the leftover state.
+      setForm(emptyForm());
+      setPendingPhoto(null);
+      setEditingId(null);
+      return;
+    }
     const payload = {
       name: finalForm.name,
       category: finalForm.category,
@@ -509,6 +532,25 @@ export default function Home() {
       setEditingId(null);
       setForm(emptyForm());
       setPendingPhoto(null);
+    }
+  }
+
+  async function handleDelete() {
+    if (!editingId) return;
+    if (!confirm(`Delete "${form.name}"? This can't be undone.`)) return;
+    setSaving(true);
+    try {
+      const res = await fetch(`/api/drinks/${editingId}`, { method: "DELETE" });
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.error || "delete failed");
+      }
+      await loadItems();
+      closeAdd();
+    } catch (err) {
+      alert("Delete failed: " + err.message);
+    } finally {
+      setSaving(false);
     }
   }
 
@@ -1009,6 +1051,11 @@ export default function Home() {
               </label>
 
               <div className="modal-actions">
+                {editingId && (
+                  <button onClick={handleDelete} className="danger" disabled={saving || analyzing}>
+                    Delete
+                  </button>
+                )}
                 <button onClick={closeAdd} className="secondary">Cancel</button>
                 <button onClick={handleSave} disabled={saving || analyzing}>
                   {saving ? "Saving…" : editingId ? "Save changes" : "Save"}
